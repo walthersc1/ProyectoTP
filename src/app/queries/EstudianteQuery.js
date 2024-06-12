@@ -1,0 +1,17 @@
+import { sql } from '@vercel/postgres';
+import { NextResponse } from 'next/server';
+ 
+export async function GET(request) {
+  try {
+    console.log("copilo")
+    const result =
+    //await sql`DROP TABLE pets;`;
+    await sql` select * from Carrera;
+
+  `;
+    //await sql`CREATE TABLE Pets ( Name varchar(255), Owner varchar(255) );`;
+    return NextResponse.json({ result }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error }, { status: 500 });
+  }
+}
