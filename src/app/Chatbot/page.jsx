@@ -24,7 +24,7 @@ export default function TextProcessor() {
   const actualizarDatos = async (e) => {
     e.preventDefault();
  
-    const response = await axios.post('https://tpalgoritmo-production.up.railway.app/predict/', {
+    const response = await axios.get('https://tpalgoritmo-production.up.railway.app/predict/', {
       text: JSON.stringify(gettext)
   });
     console.log(response)
