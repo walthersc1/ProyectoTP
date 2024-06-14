@@ -1,7 +1,6 @@
 "use client";
 
 import axios from 'axios';
-import { json } from 'micro';
 import { useState } from 'react';
 
 export default function TextProcessor() {
@@ -24,9 +23,15 @@ export default function TextProcessor() {
   const actualizarDatos = async (e) => {
     e.preventDefault();
  
-    const response = await axios.get('https://tpalgoritmo-production.up.railway.app/predict/', {
-      text: JSON.stringify(gettext)
+     console.log(gettext)
+     const response = await axios.get('https://tpalgoritmo-production.up.railway.app/predict/', {
+      params: {
+          text: gettext.text
+      }
   });
+
+
+
     console.log(response)
   };
 /*
