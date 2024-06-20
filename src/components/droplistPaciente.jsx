@@ -54,10 +54,7 @@ export default function DroplistPaciente () {
                     name: "text-default-600",
                     description: "text-default-500",
                 }}
-                avatarProps={{
-                    size: "sm",
-                    src: "/account.svg",
-                }}/>
+                />
             </DropdownItem>
             <DropdownItem key="infoPersonal" href="/InfoPersonal" endContent={Images.account}>
                 Información Personal

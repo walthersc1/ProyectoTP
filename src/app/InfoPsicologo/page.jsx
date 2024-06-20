@@ -9,7 +9,7 @@ export default function InfoPsicologo() {
     // terminar, se esta tomando como base info personal
     const id = 1;
     const consultaUsuario = async (e) => {
-        const usuario = await axios.get(`http://localhost:3000/api/docente/${id}`)
+        const usuario = await axios.get(`/api/docente/${id}`)
         return usuario.data;
     };
 
@@ -24,6 +24,8 @@ export default function InfoPsicologo() {
         fechanacimiento: "",
         estado: "",
         disponibilidad: "",
+        horainicio:"",
+        horafin:"",
     });
 
     useEffect(() => {
@@ -40,6 +42,8 @@ export default function InfoPsicologo() {
                 fechanacimiento: res.usuarios[0].fechanacimiento.slice(0, 10),
                 estado: res.usuarios[0].estado,
                 disponibilidad: res.usuarios[0].disponibilidad,
+                horainicio:res.usuarios[0].horainicio,
+                horafin:res.usuarios[0].horafin,
             });
         });
     }, []);
@@ -58,7 +62,7 @@ export default function InfoPsicologo() {
         e.preventDefault();
         console.log("front end -----")
         console.log(valoresInput)
-        axios.post(`http://localhost:3000/api/docente/${id}`, valoresInput);
+        axios.post(`/api/docente/${id}`, valoresInput);
     };
 
 
@@ -190,6 +194,39 @@ export default function InfoPsicologo() {
                                 />
                             </div>
                         </div>
+
+
+                        <div  className="sm:col-span-2">
+                        <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                Horario Inicio
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    title='horainicio'
+                                    type="time"
+                                    name="horainicio"
+                                    onChange={handleChange}
+                                    value={valoresInput.horainicio}
+                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                />
+                            </div>
+                        </div>
+                        <div className="sm:col-span-2">
+                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                Horario Fin
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    title='horafin'
+                                    type="time"
+                                    name="horafin"
+                                    onChange={handleChange}
+                                    value={valoresInput.horafin}
+                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                />
+                            </div>
+                        </div>
+
 
                         <div className="sm:col-span-4">
                             <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">

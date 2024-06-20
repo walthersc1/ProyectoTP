@@ -8,13 +8,8 @@ export default function InfoPersonal() {
 
     const id = 2;
     const consultaUsuario = async (e) => {
-        /*const usuario = await fetch(`http://localhost:3000/api/queries/${id}`,{
-            method:'GET',
-            headers:{
-            "Content-Type": "application/json",
-        }
-        });*/
-        const usuario = await axios.get(`http://localhost:3000/api/queries/${id}`)
+        const usuario = await axios.get(`/api/queries/${id}`)
+        console.log(usuario.data)
         return usuario.data;
       };
     
@@ -59,21 +54,7 @@ export default function InfoPersonal() {
           [name]: value,
         });
       };
-      /*
-      const datosquery = {
-        idestudiante: valoresInput.idestudiante,
-        nombre: valoresInput.nombre,
-        apellido: valoresInput.apellido,
-        numtelefonico: valoresInput.numtelefonico,
-        edad: valoresInput.edad,
-        correo: valoresInput.correo,
-        codestudiante: valoresInput.codestudiante,
-        codcarrera: valoresInput.codcarrera,
-        fechanacimiento: valoresInput.fechanacimiento.slice(0, 10),
-        fechacreacion: valoresInput.fechacreacion,
-        estado: valoresInput.estado,
-      }
-*/
+ 
       const actualizarDatos = async (e) => {
         e.preventDefault();
         axios.post(`/api/queries/`,valoresInput);

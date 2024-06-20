@@ -1,80 +1,214 @@
 "use client";
+import React from 'react'
+import { Images } from '@/components/imagenes'
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
 
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function TextProcessor() {
-  const [gettext, setText] = useState({
-    text: "",
+  let contado = 1;
+  const messageEndRef = useRef(null);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isDisabled, setIsDisabled] = useState(false);
+  const [userResult, setUserResult] = useState([]);
+  const [totalResult, setTotalResult] = useState(0);
+  const [data, setdata] = useState({
+    gradodepresion: "",
+    idestudiante: "2",
+    respuesta1: "",
+    respuesta2: "",
+    respuesta3: "",
+    respuesta4: "",
+    respuesta5: "",
+    respuesta6: "",
+    respuesta7: "",
+    respuesta8: "",
+    respuesta9: "",
   });
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [botResponses, setBotResponses] = useState([
+    'Mucho gusto soy Mapri, te voy a hacer unas preguntas, tus respuestas solo serán reídas en caso el personal lo necesite. Mientras mas detallada sea tu respuesta más precisa será el análisis. Escribe si para continuar.',
+    'Describa en detalle cómo ha experimentado la falta de interés o placer en actividades que antes disfrutaba. ¿En qué tipo de actividades ha notado este cambio y qué tan intenso ha sido este desinterés?',
+    'Exprese con sus palabras cómo ha percibido su estado de ánimo. ¿Siente que ha experimentado desánimo, falta de esperanza o se ha sentido decaído/triste? ¿En qué momentos o situaciones ha notado estas emociones con mayor intensidad?',
+    'Describa detalladamente sus patrones de sueño. ¿Ha tenido problemas para conciliar el sueño o se despierta con frecuencia durante la noche? ¿Sus horas de sueño han aumentado o disminuido últimamente? ¿Cómo han impactado estos cambios en su estado de ánimo?',
+    'Exprese con sus palabras cómo ha experimentado los niveles de energía. ¿Ha sentido cansancio o falta de energía constantemente? ¿En qué actividades o momentos del día ha notado esta sensación con mayor intensidad? ¿Cómo ha afectado esto a su vida cotidiana?',
+    'Describa detalladamente cómo han sido sus hábitos alimenticios. ¿Ha perdido el apetito o ha sentido una necesidad excesiva de comer? ¿Ha notado cambios en sus hábitos alimenticios? ¿Cómo han impactado estos cambios en su estado de ánimo y salud física?',
+    'Exprese con sus palabras cómo se ha sentido consigo mismo(a). ¿Ha experimentado sentimientos de culpa, vergüenza, baja autoestima o inutilidad? ¿En qué situaciones o pensamientos ha notado estos sentimientos con mayor intensidad? ¿Cómo ha afectado esto a su imagen personal y a sus relaciones?',
+    'Describa detalladamente cómo ha sido su capacidad de concentración. ¿Le ha costado enfocarse en tareas que antes le resultaban fáciles? ¿Ha notado dificultad para prestar atención o recordar información? ¿Durante qué momentos o actividades ha percibido esta dificultad con mayor intensidad? ¿Qué impacto tuvo en su rendimiento académico?',
+    'Exprese con sus palabras cómo ha sido su comportamiento motor. ¿Ha notado cambios en su ritmo de movimiento o en su forma de hablar? ¿Las personas a su alrededor han comentado algo sobre estos cambios? ¿Cómo han afectado estos cambios a sus actividades diarias y académicas?',
+    'Describa detalladamente si ha tenido pensamientos relacionados con la muerte o autolesiones. ¿Con qué frecuencia e intensidad ha tenido estos pensamientos? ¿Ha considerado llevar a cabo alguno de estos pensamientos? ¿Qué emociones o situaciones los han desencadenado?',
+    'Generando diagnostico . . .'
+  ]);
+  const [botResponseIndex, setBotResponseIndex] = useState(0);
+  const [messageCount, setMessageCount] = useState(0);
 
-  const handleChange = async (event) => {
-    const { name, value } = event.target;
-    //console.log(name + "-" + value);
-    setText({
-      ...gettext,
-      [name]: value,
-    });
+  const isFirstLoad = useRef(true); // Utilizamos useRef para mantener el estado de isFirstLoad
+
+  const handleChange = (event) => {
+    setInput(event.target.value);
+  };
+
+  const handleBotResponse = () => {
+    const botMessage = { text: botResponses[botResponseIndex], sender: 'Mapri-bot' };
+    setMessages((prevMessages) => [...prevMessages, botMessage]);
+    setBotResponseIndex((prevIndex) => prevIndex + 1);
   };
 
 
   const actualizarDatos = async (e) => {
     e.preventDefault();
- 
-     console.log(gettext)
-     const response = await axios.get('https://tpalgoritmo-production.up.railway.app/predict/', {
+
+    const userMessage = { text: input, sender: 'user' };
+
+    setMessages([...messages, userMessage]);
+    setInput('');
+
+
+    const response = await axios.get('https://tpalgoritmo-production.up.railway.app/predict/', {
       params: {
-          text: gettext.text
+        text: userMessage.text
       }
-  });
+    });
+
+    let rawData = response.data;
+
+    if (typeof rawData !== 'string') {
+      rawData = JSON.stringify(rawData);
+    }
+    const number = Number(rawData.replace(/[^\d]/g, ''));
 
 
+    if (botResponseIndex > 1 && botResponseIndex < 11) {
+      const string = "respuesta" + (botResponseIndex -1)
+      console.log(string)
+      setdata({
+        ...data,
+        [string]: userMessage.text,
+      });
+      setTotalResult(prevTotal => prevTotal + number);
+      contado += 1;
+    }
+    if (botResponseIndex === 10) {
+      console.log("Entrando a generar resultado");
+      console.log(totalResult);
+      setIsDisabled(true);
+      switch (true) {
+        case totalResult < 5:
+          setUserResult('Minima');
+          break;
+        case totalResult < 10:
+          setUserResult('Leve');
+          break;
+        case totalResult < 15:
+          setUserResult('Moderada');
+          break;
+        case totalResult < 20:
+          setUserResult('Moderadamente severa');
+          break;
+        default:
+          setUserResult('Severa');
+          break;
+      }
 
-    console.log(response)
+
+    }
+
+
+    // Simular respuesta del bot
+    handleBotResponse();
   };
-/*
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    
-      console.log("Post entrando - entrada de datos:" + text)
-      const response = await axios.post(`/api/ia/`, text );
-      console.log("Post saliendo" + response)
-      setResult(response.data.result);
 
-  };*/
+  const mostrarREsultado = async (event) => {
+    setdata({
+      ...data,
+      gradodepresion: userResult,
+    })
+    const respuesta =await axios.post('/api/chatbot',data)
+    console.log(respuesta)
+    onOpen;
+  };
+
+  useEffect(() => {
+    // Verificar si es la primera carga del componente
+    if (isFirstLoad.current) {
+      // Iniciar conversación con la primera respuesta del bot solo en la carga inicial
+      handleBotResponse();
+      isFirstLoad.current = false; // Marcar que la carga inicial ya se realizó      
+    }
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollTop = messageEndRef.current.scrollHeight;
+    }
+
+
+  }, [messages]); // Se ejecuta solo una vez al inicio
+
 
   return (
-    <form>
-      <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-    <div className="sm:col-span-3">
-    <label htmlFor="first-name" className="block text-sm font-medium leading-6 text-gray-900">
-        Nombres
-    </label>
-    <div className="mt-2">
-        <input
-        type="text"
-        name="text"
-        id="first-name"
-        autoComplete="given-name"
-        className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-        onChange={handleChange}
-        value={gettext.text}
-        />
-    </div>
-</div>
-</div>
+    <section className="flex justify-center pt-12 pb-12 h-fit">
+      <div className="flex flex-col bg-white rounded-lg shadow-lg justify-between w-9/12 h-full">
 
-<div className="sm:col-span-2 sm:col-start-4">
+        <header className='bg-violet-600 text-2xl font-bold rounded-t-lg self-start text-lg content-center h-fit w-full'>
+          <h2 className='titulo'>Chatbot MAPRI</h2>
+        </header>
 
-<div className="mt-2 font-bold">
-<button onClick={actualizarDatos} className="font-sans text-white bg-violet-500 w-full rounded-full border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:max-w-xs sm:text-sm sm:leading-6 p-3">
-    modificar
-</button>
-</div>
+        <div className="flex-grow p-8">
+          <div className='overflow-y-scroll flex flex-col h-[500px]' ref={messageEndRef}>
+            {messages.map((message, index) => (
 
-</div>
-</form>
+              <div key={index} className={`my-2 p-2 rounded-lg max-w-xs ${message.sender === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-gray-300 text-black self-start'}`}>
+                <div className={`  ${message.sender === 'user' ? 'text-right fond-bold' : 'text-left font-bold'}`}>
+                  {message.sender}
+                </div>
+                {message.text}
+              </div>
+            ))}
+
+          </div>
+        </div>
+        <form onSubmit={actualizarDatos} className="flex w-full p-8 mt-auto">
+
+          <input
+            type="text"
+            className="w-full align-middle p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring focus:border-blue-300"
+            value={input}
+            onChange={handleChange}
+            disabled={isDisabled}
+            placeholder="Escribe tu mensaje..."
+          />
+
+          <button disabled={isDisabled} type="submit" className="bg-blue-500 text-white p-2 rounded-r-lg">Enviar</button>
+        </form>
+        {botResponseIndex == 11 && (
+          <button onClick={mostrarREsultado} className='bg-teal-400 rounded lg w-1/2 self-center p-2 mb-3'>Visualizar Resultados</button>
+
+        )}
+      </div>
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='3xl' scrollBehavior='inside'>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">Diagnostico de cuestionario</ModalHeader>
+              <ModalBody>
+                <div className='grid grid-cols-2'>
+                  <h2>{userResult}</h2>
+                  <h2>{totalResult}</h2>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="danger" variant="light" onPress={onClose}>
+                  Close
+                </Button>
+                <Button color="primary" onPress={onClose}>
+                  Agendar Cita
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+    </section>
   );
 }
