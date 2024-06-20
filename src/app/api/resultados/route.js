@@ -8,7 +8,6 @@ export async function POST(req, { params }) {
         const datos = await req.json();
         console.log(datos);
         let contador = 0;
-        const conditions = [];
         const values = [];
 
         let consulta = `

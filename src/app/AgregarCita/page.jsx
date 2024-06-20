@@ -38,7 +38,7 @@ export default function AgendarCita() {
  
       toast.success('Cita guardada satisfactoriamente');
       const response = await axios.put('/api/agregarcita', selectedDate);
-       
+      consultaUsuario();
       // Opcional: actualizar la lista de citas o mostrar una notificación de éxito
     } catch (error) {
       console.error('Error saving data:', error);
