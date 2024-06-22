@@ -82,7 +82,7 @@ export default function TextProcessor() {
 
     if (botResponseIndex > 1 && botResponseIndex < 11) {
       const string = "respuesta" + (botResponseIndex -1)
-      console.log(string)
+  
       setdata({
         ...data,
         [string]: userMessage.text,
@@ -91,8 +91,7 @@ export default function TextProcessor() {
       contado += 1;
     }
     if (botResponseIndex === 10) {
-      console.log("Entrando a generar resultado");
-      console.log(totalResult);
+ 
       setIsDisabled(true);
       switch (true) {
         case totalResult < 5:
@@ -126,8 +125,8 @@ export default function TextProcessor() {
       gradodepresion: userResult,
     })
     const respuesta =await axios.post('/api/chatbot',data)
-    console.log(respuesta)
-    onOpen;
+ 
+    onOpen();
   };
 
   useEffect(() => {
@@ -200,9 +199,9 @@ export default function TextProcessor() {
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" onPress={onClose}>
-                  Agendar Cita
-                </Button>
+                <button color="primary" onPress={onClose}>
+                 <a  href='/Contactar'> Agendar Cita</a>
+                </button>
               </ModalFooter>
             </>
           )}
