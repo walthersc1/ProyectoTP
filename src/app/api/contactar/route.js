@@ -15,7 +15,9 @@ export async function POST(req, { params }) {
             select coddocente, 
             ( nombre || ' ' || apellido) as nombre, 
             ( horainicio || ' - ' || horafin ) as Horario,
-            sede 
+            sede,
+            numtelefono,
+            correo 
             from docentes `;
 
         if (datos.sede) {

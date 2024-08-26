@@ -5,12 +5,11 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function InfoPsicologo() {
-
-    // terminar, se esta tomando como base info personal
-    const id = 1;
     const consultaUsuario = async (e) => {
-        const usuario = await axios.get(`/api/docente/${id}`)
-        return usuario.data;
+        const data = await axios.get('/api/getToken')
+        const correo = data.data.email
+        const usuario = await axios.get(`/api/docente/${correo}`)
+        return usuario.data.psicologo[0];
     };
 
     const [valoresInput, setValoresInput] = useState({
@@ -24,26 +23,26 @@ export default function InfoPsicologo() {
         fechanacimiento: "",
         estado: "",
         disponibilidad: "",
-        horainicio:"",
-        horafin:"",
+        horainicio: "",
+        horafin: "",
     });
 
     useEffect(() => {
         consultaUsuario().then((res) => {
 
             setValoresInput({
-                iddocente: res.usuarios[0].iddocente,
-                nombre: res.usuarios[0].nombre,
-                apellido: res.usuarios[0].apellido,
-                numtelefonico: res.usuarios[0].numtelefono,
-                edad: res.usuarios[0].edad,
-                correo: res.usuarios[0].correo,
-                coddocente: res.usuarios[0].coddocente,
-                fechanacimiento: res.usuarios[0].fechanacimiento.slice(0, 10),
-                estado: res.usuarios[0].estado,
-                disponibilidad: res.usuarios[0].disponibilidad,
-                horainicio:res.usuarios[0].horainicio,
-                horafin:res.usuarios[0].horafin,
+                iddocente: res.iddocente,
+                nombre: res.nombre,
+                apellido: res.apellido,
+                numtelefonico: res.numtelefono,
+                edad: res.edad,
+                correo: res.correo,
+                coddocente: res.coddocente,
+                fechanacimiento: res.fechanacimiento.slice(0, 10),
+                estado: res.estado,
+                disponibilidad: res.disponibilidad,
+                horainicio: res.horainicio,
+                horafin: res.horafin,
             });
         });
     }, []);
@@ -196,8 +195,8 @@ export default function InfoPsicologo() {
                         </div>
 
 
-                        <div  className="sm:col-span-2">
-                        <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                        <div className="sm:col-span-2">
+                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
                                 Horario Inicio
                             </label>
                             <div className="mt-2">

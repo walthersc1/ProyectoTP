@@ -1,16 +1,17 @@
 "use client";
-import Navegation from "@/components/Navegation";
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
 import axios from "axios";
 
 export default function ContactarPsicologo() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+  const [contactInfo, setContactInfo] = useState({ correo: "", numtelefono: "" });
   const [selectedDate, setSelectedDate] = useState({
     nombre: "",
     sede: "",
     codigo: "",
+    numtelefono: "",
+    correo: "",
   });
   const [psicologo, setpsicologo] = useState([]);
   const handleDateChange = (event) => {
@@ -23,16 +24,19 @@ export default function ContactarPsicologo() {
     buscarPsicologo()
   };
 
+  const handleContactClick = (correo, numtelefono) => {
+    setContactInfo({ correo, numtelefono });
+    onOpen();
+  };
+
   const buscarPsicologo = async () => {
-    console.log("Entro a buscar psicologo")
-    const respuesta =await axios.post('/api/contactar', selectedDate);
-    console.log(respuesta.data)
+    const respuesta = await axios.post('/api/contactar', selectedDate);
     setpsicologo(respuesta.data);
   };
 
   useEffect(() => {
-    buscarPsicologo();  
-  }, [selectedDate]);  
+    buscarPsicologo();
+  }, [selectedDate]);
 
 
   return (
@@ -104,21 +108,21 @@ export default function ContactarPsicologo() {
               <tr>
                 <th className="p-3 text-sm font-semibold tracking-wide text-center text-white" scope="col">Código</th>
                 <th className="p-3 text-sm font-semibold tracking-wide text-center text-white" scope="col">Nombre y apellido</th>
-                <th className="p-3 text-sm font-semibold tracking-wide text-center text-white" scope="col">Sede</th>
                 <th className="p-3 text-sm font-semibold tracking-wide text-center text-white" scope="col">Horario</th>
+                <th className="p-3 text-sm font-semibold tracking-wide text-center text-white" scope="col">Sede</th>
                 <th className="p-3 text-sm font-semibold tracking-wide text-center text-white" scope="col">Contacto</th>
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-300'>
-            {psicologo.map((datos, index) => (
+              {psicologo.map((datos, index) => (
                 <tr key={index} className='bg-white'>
                   <td className="p-3 text-sm whitespace-nowrap font-bold text-blue-500">{datos.coddocente}</td>
                   <td className="p-3 text-sm whitespace-nowrap text-gray-800">{datos.nombre}</td>
                   <td className="p-3 text-sm whitespace-nowrap text-gray-800">{datos.horario}</td>
                   <td className="p-3 text-sm whitespace-nowrap text-gray-800">{datos.sede}</td>
-                   
-                  <button onClick={onOpen} className='text-[14px] font-bold border-2 border-black px-2 my-1 text-black rounded-full bg-slate-300'>Contactar</button>
-                 
+
+                  <button onClick={() => handleContactClick(datos.correo,datos.numtelefono)} className='text-[14px] font-bold border-2 border-black px-2 my-1 text-black rounded-full bg-slate-300'>Contactar</button>
+
                 </tr>
               ))}
 
@@ -132,9 +136,9 @@ export default function ContactarPsicologo() {
                   <ModalBody>
                     <div className='grid grid-cols-2 gap-4'>
                       <h2 className="text-end font-bold pr-4">Correo electronico: </h2>
-                      <p className="underline underline-offset-4 text-sky-500">prueba@upc.pe.pe</p>
+                      <p className="underline underline-offset-4 text-sky-500">{contactInfo.correo}</p>
                       <h2 className="text-end font-bold pr-4">Número de telefono: </h2>
-                      <p className="text-sky-500">987456115</p>
+                      <p className="text-sky-500">{contactInfo.numtelefono}</p>
 
                     </div>
                   </ModalBody>

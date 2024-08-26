@@ -3,9 +3,9 @@ import { NextResponse } from 'next/server';
  
 export async function GET(request,{params}) {
   try {
-
+console.log("Obtener datos usuario")
     const {rows:usuarios} =
-    await sql`select * from estudiantes where idestudiante = ${params.id} ;  `;
+    await sql`select * from estudiantes where correo = ${params.correo} ;  `;
 
    
     
@@ -18,19 +18,5 @@ export async function GET(request,{params}) {
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 });
   }
-}
-
-
-export async function POST(req, {params}) {
-  try 
-  {
-    const datos = await req.json();
-    console.log(datos);
-
-    return NextResponse.json("Se actualizo correctamnete - 200");//usuarios
-  } catch (error) {
-    return NextResponse.error('Error: ' + error.message,500);
-   
-  } 
 }
 

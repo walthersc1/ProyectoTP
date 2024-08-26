@@ -1,11 +1,11 @@
 import { sql } from '@vercel/postgres';
-import { compareSync } from 'bcrypt';
 import { NextResponse } from 'next/server';
 
-export async function POST(req, { params }) {
+export async function POST(req) {
     try {
+        console.log("Entrando al post")
         const datos = await req.json();
- 
+        console.log(datos) 
         const consulta = await sql`
         select  e.codestudiante, (e.nombre || ' ' || e.apellido) nombre, c.modalidad, c.lugar, 
         c.horainicio,c.horafin  from cita c inner join estudiantes e on c.idestudiante = e.idestudiante
@@ -13,7 +13,6 @@ export async function POST(req, { params }) {
         and c.fecha =  ${datos.fecha};
         `;
  
-
         return NextResponse.json(consulta.rows);
     } catch (error) {
         return NextResponse.json({ error }, { status: 500 });
@@ -23,6 +22,7 @@ export async function POST(req, { params }) {
 export async function PUT(req, { params }) {
     try {
         const datos = await req.json();
+        consolo.log("Entrando al Put")
         console.log(datos)
         const consulta = await sql`
         select idestudiante from estudiantes

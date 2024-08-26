@@ -15,7 +15,7 @@ export default function TextProcessor() {
   const [totalResult, setTotalResult] = useState(0);
   const [data, setdata] = useState({
     gradodepresion: "",
-    idestudiante: "2",
+    idestudiante: "",//que este dato no este a fuego
     respuesta1: "",
     respuesta2: "",
     respuesta3: "",
@@ -59,13 +59,13 @@ export default function TextProcessor() {
 
   const actualizarDatos = async (e) => {
     e.preventDefault();
-
+    console.log("Se envio la respuesta")
     const userMessage = { text: input, sender: 'user' };
 
     setMessages([...messages, userMessage]);
     setInput('');
 
-
+    console.log(data)
     const response = await axios.get('https://tpalgoritmo-production.up.railway.app/predict/', {
       params: {
         text: userMessage.text
@@ -81,8 +81,8 @@ export default function TextProcessor() {
 
 
     if (botResponseIndex > 1 && botResponseIndex < 11) {
-      const string = "respuesta" + (botResponseIndex -1)
-  
+      const string = "respuesta" + (botResponseIndex - 1)
+
       setdata({
         ...data,
         [string]: userMessage.text,
@@ -91,7 +91,7 @@ export default function TextProcessor() {
       contado += 1;
     }
     if (botResponseIndex === 10) {
- 
+
       setIsDisabled(true);
       switch (true) {
         case totalResult < 5:
@@ -124,15 +124,16 @@ export default function TextProcessor() {
       ...data,
       gradodepresion: userResult,
     })
-    const respuesta =await axios.post('/api/chatbot',data)
- 
+    const respuesta = await axios.post('/api/chatbot', data)
+
     onOpen();
   };
 
+
   useEffect(() => {
-    // Verificar si es la primera carga del componente
+
+
     if (isFirstLoad.current) {
-      // Iniciar conversación con la primera respuesta del bot solo en la carga inicial
       handleBotResponse();
       isFirstLoad.current = false; // Marcar que la carga inicial ya se realizó      
     }
@@ -140,7 +141,21 @@ export default function TextProcessor() {
       messageEndRef.current.scrollTop = messageEndRef.current.scrollHeight;
     }
 
-
+    const consultaUsuario = async () => {
+      try {
+        const datos = await axios.get('/api/getToken')
+        const correo = datos.data.email
+        const usuario = await axios.get(`/api/queries/${correo}`)
+        console.log("Entrando a setear la data")
+        setdata({
+          ...data,
+          idestudiante: (usuario.data.usuarios[0].idestudiante),
+        });
+      } catch (error) {
+        console.error('Error al obtener la información del usuario:', error);
+      }
+    };
+    consultaUsuario()
   }, [messages]); // Se ejecuta solo una vez al inicio
 
 
@@ -200,7 +215,7 @@ export default function TextProcessor() {
                   Close
                 </Button>
                 <button color="primary" onPress={onClose}>
-                 <a  href='/Contactar'> Agendar Cita</a>
+                  <a href='/Contactar'> Agendar Cita</a>
                 </button>
               </ModalFooter>
             </>

@@ -1,18 +1,17 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
+import axios from 'axios';
+import { json } from 'body-parser';
 
 export async function GET(request, { params }) {
   try {
-
-    const { rows: usuarios } =
-      await sql`select * from docentes where iddocente = ${params.id} ;  `;
-
-
-
-    if (usuarios.length > 0) {
-      return NextResponse.json({ usuarios }, { status: 200 });
+    const { rows: psicologo } =
+      await sql`select * from docentes where correo = ${params.correo} ;  `;
+      
+    if (psicologo.length > 0) {
+      return NextResponse.json({ psicologo }, { status: 200 });
     } else {
-      return NextResponse.json({ error: "estudiante no encontro" }, { status: 404 });
+      return NextResponse.json({ error: "Error a encontrar la id del docente" }, { status: 404 });
     }
 
   } catch (error) {

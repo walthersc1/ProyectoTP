@@ -1,11 +1,15 @@
 'use client'
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from 'next/navigation';
 
-export default function RegistrarPaciente () {
+export default function RegistrarPaciente() {
 
 
-
-    const [values, setValues] =useState({
+    const route = useRouter();
+    const [values, setValues] = useState({
         nombre: "",
         apellido: "",
         numtelefono: "",
@@ -15,30 +19,62 @@ export default function RegistrarPaciente () {
         codcarrera: "",
         fechanacimiento: "",
         fechacreacion: "",
-        password:'',
+        password: '',
         confirmpassword: '',
     })
 
-    const regex =/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    const [carreras, setCarreras] = useState([]);
+
+    useEffect(() => {
+        const fetchCarreras = async () => {
+            try {
+                const RsCarreras = await axios.get('/api/queries/carreras');
+                setCarreras(RsCarreras.data.datos.rows);
+            } catch (error) {
+                console.error('Error al obtener las carreras:', error);
+            }
+        };
+
+        fetchCarreras();
+    }, []);
+
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
     const [errors, setErrors] = useState({})
 
-    const handleChange = (e) =>{
-        const {name, value} = e.target;
-        setValues({ ...values, [name] : value })
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setValues({
+            ...values,
+            [name]: value
+        });
     }
 
     const año = new Date().getFullYear();
 
-    const handleSubmit  = (e) => {
+    const toasterror = (message) => {
+
+        toast.error(message, {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+        });
+    }
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const validationErrors= {};
+        const validationErrors = {};
 
-
-        if(!values.nombre.trim() || !values.nombre.includes(" ")){
+        // personalisar mas los mensaje de error para nombre y apellido, la segunda condicion del if
+        if (!values.nombre.trim() || !values.nombre.includes(" ")) {
             validationErrors.nombre = "Introdusca sus nombres"
         }
-        if(!values.apellido.trim() || !values.apellido.includes(" ") ){
+        if (!values.apellido.trim() || !values.apellido.includes(" ")) {
             validationErrors.apellido = "Introdusca sus apellidos"
         }
 
@@ -49,23 +85,26 @@ export default function RegistrarPaciente () {
         if (!values.codestudiante.trim()) {
             validationErrors.codestudiante = "Introdusca su código de estudiante"
         }
+        if (values.codestudiante.length > 11) {
+            validationErrors.codestudiante = "Código no valido, demasiados caracteres"
+        }
 
         if (!values.codcarrera.trim()) {
             validationErrors.codcarrera = "Introdusca su carrera"
         }
 
-        if(!values.correo.trim()){
+        if (!values.correo.trim()) {
             validationErrors.correo = "Se requiere ingresar correo "
-        }else if(!regex.test(values.correo)){
+        } else if (!regex.test(values.correo)) {
             validationErrors.correo = "Correo no valido"
         }
 
         if (!values.numtelefono.trim()) {
             validationErrors.numtelefono = "Se requiere ingresar un número de telefono"
-        } else if (isNumber(values.numtelefono) ||values.numtelefono.length != 9) {
+        } else if (isNaN(parseInt(values.numtelefono), 10) || values.numtelefono.length != 9) {
             validationErrors.numtelefono = "Numero de telefóno no valido"
         }
-        
+
         if (!values.fechanacimiento.trim()) {
             validationErrors.fechanacimiento = "Debe de ingresar sus apellidos"
         } else {
@@ -75,22 +114,39 @@ export default function RegistrarPaciente () {
             }
         }
 
-        if(!values.password.trim()){
+        if (!values.password.trim()) {
             validationErrors.password = "Se requiere ingresar contraseña"
-        }else if(values.password.length <6){
+        } else if (values.password.length < 6) {
             validationErrors.email = "Contraseña debe ser mayor a 6 digitos"
         }
 
 
-        if(values.confirmpassword!==values.password){
+        if (values.confirmpassword !== values.password) {
             validationErrors.confirmpassword = "Contraseña no es igual"
         }
 
 
 
-        setErrors(validationErrors)     
+        setErrors(validationErrors)
+        try {
 
 
+            if (Object.keys(validationErrors).length == 0) {
+
+                console.log("Entrando a la consulta")
+                const result = await axios.put(`/api/queries`, values)
+                console.log(result)
+
+            }
+            console.log("Entrnado a redirigir")
+            //route.push('/');
+
+        } catch (error) {
+            console.log(error.response)
+            if (error.response.status == 500) {
+                toasterror(error.response.data.message)
+            }
+        }
     }
 
 
@@ -111,175 +167,175 @@ export default function RegistrarPaciente () {
                             </label>
                             <div className="mt-2">
                                 <input
-                                type="text"
-                                name="nombre"
-                                id="nombre"
-                                onChange={handleChange}
-                                autoComplete="given-name"
-                                className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                    type="text"
+                                    name="nombre"
+                                    id="nombre"
+                                    onChange={handleChange}
+                                    autoComplete="given-name"
+                                    className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                 /> {errors.nombre && <p className="text-red-400 text-left text-[13px]">{errors.nombre}</p>}
                             </div>
                         </div>
 
                         <div className="sm:col-span-3">
-                        <label htmlFor="apellido" className="block text-sm font-medium leading-6 text-white">
-                            Apellidos
-                        </label>
-                        <div className="mt-2">
-                            <input
-                            type="text"
-                            name="apellido"
-                            id="apellido"
-                            onChange={handleChange}
-                            autoComplete="family-name"
-                            className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                            />{errors.apellido && <p className="text-red-400 text-left text-[13px]">{errors.apellido}</p>}
+                            <label htmlFor="apellido" className="block text-sm font-medium leading-6 text-white">
+                                Apellidos
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="text"
+                                    name="apellido"
+                                    id="apellido"
+                                    onChange={handleChange}
+                                    autoComplete="family-name"
+                                    className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                />{errors.apellido && <p className="text-red-400 text-left text-[13px]">{errors.apellido}</p>}
+                            </div>
                         </div>
-                        </div>
-                        
+
                         <div className="sm:col-span-2 sm:col-start-1">
-                        <label htmlFor="numtelefonico" className="block text-sm font-medium leading-6 text-white">
-                            Telefono
-                        </label>
-                        <div className="mt-2">
-                            <input
-                            type="tel"
-                            name="numtelefono"
-                            id=""
-                            onChange={handleChange}
-                            autoComplete="address-level2"
-                            className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                            />{errors.numtelefono && <p className="text-red-400 text-left text-[13px]">{errors.numtelefono}</p>}
-                        </div>
-                        </div>
-
-                        <div className="sm:col-span-2">
-                        <label htmlFor="edad" className="block text-sm font-medium leading-6 text-white">
-                            Edad
-                        </label>
-                        <div className="mt-2">
-                            <input
-                            type="number"
-                            name="edad"
-                            id="edad"
-                            onChange={handleChange}
-                            autoComplete="address-level1"
-                            className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                            />{errors.edad && <p className="text-red-400 text-left text-[13px]">{errors.edad}</p>}
-                        </div>
+                            <label htmlFor="numtelefonico" className="block text-sm font-medium leading-6 text-white">
+                                Telefono
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="tel"
+                                    name="numtelefono"
+                                    id=""
+                                    onChange={handleChange}
+                                    autoComplete="address-level2"
+                                    className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                />{errors.numtelefono && <p className="text-red-400 text-left text-[13px]">{errors.numtelefono}</p>}
+                            </div>
                         </div>
 
                         <div className="sm:col-span-2">
-                        <label htmlFor="fechanacimiento" className="block text-sm font-medium leading-6 text-white">
-                            Fecha de Nacimiento
-                        </label>
-                        <div className="mt-2">
-                            <input
-                            type="date"
-                            name="fechanacimiento"
-                            id="birth-date"
-                            onChange={handleChange}
-                            autoComplete="birth-date"
-                            className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                            />{errors.fechanacimiento && <p className="text-red-400 text-left text-[13px]">{errors.fechanacimiento}</p>}
-                        </div>
+                            <label htmlFor="edad" className="block text-sm font-medium leading-6 text-white">
+                                Edad
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="number"
+                                    name="edad"
+                                    id="edad"
+                                    onChange={handleChange}
+                                    autoComplete="address-level1"
+                                    className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                />{errors.edad && <p className="text-red-400 text-left text-[13px]">{errors.edad}</p>}
+                            </div>
                         </div>
 
                         <div className="sm:col-span-2">
-                        <label htmlFor="codestudiante" className="block text-sm font-medium leading-6 text-white">
-                            Codigo de Estudiante
-                        </label>
-                        <div className="mt-2">
-                            <input
-                            type="text"
-                            name="codestudiante"
-                            id="codestudiante"
-                            onChange={handleChange}
-                            className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                            />{errors.codestudiante && <p className="text-red-400 text-left text-[13px]">{errors.codestudiante}</p>}
+                            <label htmlFor="fechanacimiento" className="block text-sm font-medium leading-6 text-white">
+                                Fecha de Nacimiento
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="date"
+                                    name="fechanacimiento"
+                                    id="birth-date"
+                                    onChange={handleChange}
+                                    autoComplete="birth-date"
+                                    className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                />{errors.fechanacimiento && <p className="text-red-400 text-left text-[13px]">{errors.fechanacimiento}</p>}
+                            </div>
                         </div>
+
+                        <div className="sm:col-span-2">
+                            <label htmlFor="codestudiante" className="block text-sm font-medium leading-6 text-white">
+                                Codigo de Estudiante
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="text"
+                                    name="codestudiante"
+                                    id="codestudiante"
+                                    onChange={handleChange}
+                                    className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                />{errors.codestudiante && <p className="text-red-400 text-left text-[13px]">{errors.codestudiante}</p>}
+                            </div>
                         </div>
-                        
+
                         <div className="sm:col-span-3">
-                        <label htmlFor="codcarrera" className="block text-sm font-medium leading-6 text-white">
-                            Carrera
-                        </label>
-                        <div className="mt-2">
-                            <select
-                            id="codcarrera"
-                            name="codcarrera"
-                            onChange={handleChange}
-                            className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:max-w-xs sm:text-sm sm:leading-6 p-3"
-                            >
-                            <option></option>
-                            <option>Ingeniería de Sistema de Información</option>
-                            <option>Ingeniería de Software</option>
-                            <option>Ciencias de la computación</option>
-                            </select>{errors.codcarrera && <p className="text-red-400 text-left text-[13px]">{errors.codcarrera}</p>}
-                        </div>
-                        </div>
-                        
-                        <div className="sm:col-span-4">
-                        <label htmlFor="correo" className="block text-sm font-medium leading-6 text-white">
-                            Correo
-                        </label>
-                        <div className="mt-2">
-                            <input
-                            id="correo"
-                            name="correo"
-                            type="email"
-                            autoComplete="email"
-                            onChange={handleChange}
-                            className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                            />
-                            {errors.correo && <p className="text-red-400 text-left text-[13px]">{errors.correo}</p>}
-                        </div>
+                            <label htmlFor="codcarrera" className="block text-sm font-medium leading-6 text-white">
+                                Carrera
+                            </label>
+                            <div className="mt-2">
+                                <select
+                                    id="codcarrera"
+                                    name="codcarrera"
+                                    onChange={handleChange}
+                                    className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:max-w-xs sm:text-sm sm:leading-6 p-3"
+                                >
+                                    <option value="0"></option>
+                                    {carreras.map((row) => (
+                                        <option key={row.idcarrera} value={row.idcarrera}>{row.carrera}</option>
+                                    ))}
+                                </select>{errors.codcarrera && <p className="text-red-400 text-left text-[13px]">{errors.codcarrera}</p>}
+                            </div>
                         </div>
 
                         <div className="sm:col-span-4">
-                        <label htmlFor="password" className="block text-sm font-medium leading-6 text-white">
-                            Contraseña
-                        </label>
-                        <div className="mt-2">
-                            <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            autoComplete="password"
-                            onChange={handleChange}
-                            className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                            />
-                            {errors.password && <p className="text-red-400 text-left text-[13px]">{errors.password}</p>}
-                        </div>
+                            <label htmlFor="correo" className="block text-sm font-medium leading-6 text-white">
+                                Correo
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    id="correo"
+                                    name="correo"
+                                    type="email"
+                                    autoComplete="email"
+                                    onChange={handleChange}
+                                    className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                />
+                                {errors.correo && <p className="text-red-400 text-left text-[13px]">{errors.correo}</p>}
+                            </div>
                         </div>
 
                         <div className="sm:col-span-4">
-                        <label htmlFor="password" className="block text-sm font-medium leading-6 text-white">
-                            Confirmar Contraseña
-                        </label>
-                        <div className="mt-2">
-                            <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            autoComplete="password"
-                            onChange={handleChange}
-                            className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                            />
-                            {errors.confirmpassword && <p className="text-red-400 text-left text-[13px]">{errors.confirmpassword}</p>}
+                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-white">
+                                Contraseña
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    autoComplete="password"
+                                    onChange={handleChange}
+                                    className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                />
+                                {errors.password && <p className="text-red-400 text-left text-[13px]">{errors.password}</p>}
+                            </div>
                         </div>
+
+                        <div className="sm:col-span-4">
+                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-white">
+                                Confirmar Contraseña
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    id="password"
+                                    name="confirmpassword"
+                                    type="password"
+                                    autoComplete="password"
+                                    onChange={handleChange}
+                                    className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                />
+                                {errors.confirmpassword && <p className="text-red-400 text-left text-[13px]">{errors.confirmpassword}</p>}
+                            </div>
                         </div>
 
                         <div className="sm:col-span-2 sm:col-start-3">
 
                             <div className="mt-2 font-bold">
-                            <button className="font-sans text-white bg-teal-500 w-full rounded-full border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:max-w-xs sm:text-sm sm:leading-6 p-3">
-                                <a >Registrar</a>
-                            </button>
+                                <button className="font-sans text-white bg-teal-500 w-full rounded-full border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:max-w-xs sm:text-sm sm:leading-6 p-3">
+                                    <a >Registrar</a>
+                                </button>
                             </div>
 
                         </div>
-                        
+                        <ToastContainer />
                     </div>
                 </div>
 

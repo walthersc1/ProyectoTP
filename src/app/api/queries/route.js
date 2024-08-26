@@ -1,7 +1,6 @@
 import { sql } from '@vercel/postgres';
-import next from 'next';
 import { NextResponse } from 'next/server';
-
+import bcrypt from 'bcrypt';
 
 export async function GET(request) {
   try {
@@ -20,23 +19,27 @@ export async function GET(request) {
 
 
 export async function PUT(request) {
-  /*try {
+  try {
+    const datos = await request.json();
 
-    const { nombre, apellido, numtelefonico,
-      edad, correo, codestudiante, codcarrera, fechanacimiento,
-      fechacreacion, estado } = await request.json();
+    const hashedPassword = await bcrypt.hash(datos.password, parseInt(process.env.saltRounds));
+    var checkEmailQuery = 0;
+
+    checkEmailQuery = await sql`SELECT COUNT(*) FROM estudiantes WHERE correo = ${datos.correo}`
+
+    if (checkEmailQuery.rows[0].count > 0) {
+      return NextResponse.json({ message: "ya existe un usuario registrado con este correo" }, { status: 500 });        
+    }
 
     await sql`
-        INSERT INTO estudiantes (nombre, apellido,numtelefonico,edad,correo, codestudiante, codcarrera,fechanacimiento)
-        values (  ${nombre} , ${apellido},${numtelefonico},${edad},${correo},${codestudiante},${codcarrera},${fechanacimiento});
-        `;
+      INSERT INTO estudiantes (nombre, apellido,numtelefono,edad,correo,codestudiante, codcarrera,fechanacimiento,contraseña)
+      values (  ${datos.nombre} , ${datos.apellido},${datos.numtelefono},${datos.edad}, ${datos.correo},${datos.codestudiante},${datos.codcarrera} ,${datos.fechanacimiento},${hashedPassword});
+      `;
 
-    return NextResponse.json("Se inserto correctamnete - 200");//usuarios
+    return NextResponse.json({ message: "Se creo la cuenta correctamente " }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 });
-  }*/
-
-  return NextResponse.json("si entro")
+  }
 }
 
 export async function POST(req, { params }) {
@@ -54,7 +57,7 @@ export async function POST(req, { params }) {
         fechanacimiento = ${datos.fechanacimiento}
     WHERE
       idestudiante = ${datos.idestudiante};`
-      
+
     return NextResponse.json("Se actualizo correctamnete - 200");
   } catch (error) {
     return NextResponse.error('Error: ' + error.message, 500);
