@@ -9,17 +9,30 @@ export default function Historial() {
   const [getResultado, setResultado] = useState([]);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [modalData, setModalData] = useState(null);
-
-  const datosEstudiante = useState({
-    codestudiante: "u20191cc100",
+  const [datosEstudiante,setdatosEstudiante] = useState({
+    codigo: "",
   });
+  useEffect(() => {
+    const obtenerDatosUsuario = async (e) => {
+      const data = await axios.get('/api/getToken')
+      const correo = data.data.email
+      const usuario = await axios.get(`/api/queries/${correo}`)
+      setdatosEstudiante({
+        codigo:usuario.data.usuarios[0].codestudiante,
+      })
+  };
+  obtenerDatosUsuario()
+  
+  }, []);
+
+
   const fetchModalData = async () => {
     try {
       console.log("Entrando a generar popup");
       const response = await axios.post('/api/resultados', JSON.stringify(datosEstudiante));
-      console.log(response.data)
+      //console.log(response.data)
       setResultado(response.data)
-      
+
     } catch (error) {
       console.error('Error fetching details:', error);
     }
@@ -28,8 +41,7 @@ export default function Historial() {
   const mostrarModal = async (idestudiante) => {
     try {
       console.log("Entrando a generar popup");
-      const response = await axios.post('/api/resultados/obtenerDetalle',JSON.stringify(idestudiante) );
-      console.log(response.data)
+      const response = await axios.post('/api/resultados/obtenerDetalle', JSON.stringify(idestudiante));
       setModalData(response.data);
       onOpen();
     } catch (error) {
@@ -39,7 +51,7 @@ export default function Historial() {
 
   useEffect(() => {
     fetchModalData()
-  }, []);
+  }, [datosEstudiante]);
   return (
     <section className="flex-col justify-center justify-items-center text-center">
       <div className='flex-none bg-slate-800 border border-slate-400 rounded-md m-16 p-16 shadow-lg

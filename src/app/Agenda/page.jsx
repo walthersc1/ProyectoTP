@@ -14,7 +14,22 @@ export default function Agenda() {
     codcita: "",
     fecha: "",
     nombre: "",
+    codigo:"",
   });
+
+  useEffect(() => {
+    const obtenerDatosUsuario = async (e) => {
+      const data = await axios.get('/api/getToken')
+      const correo = data.data.email
+      const usuario = await axios.get(`/api/queries/${correo}`)
+      setdatos({
+        ...datos,
+        codigo:usuario.data.usuarios[0].codestudiante,
+      })
+  };
+  obtenerDatosUsuario()
+  
+  }, []);
   const [table, settable] = useState([]);
   const handleDateChange = (event) => {
     const { name, value } = event.target;
@@ -26,7 +41,6 @@ export default function Agenda() {
   };
 
   const consultaUsuario = async () => {
-    console.log(datos);
     const respuesta = await axios.post('/api/agenda', datos);
     settable(respuesta.data)
   }

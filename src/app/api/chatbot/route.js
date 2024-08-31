@@ -3,10 +3,9 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req, { params }) {
     try {
- 
+
         const datos = await req.json();
- 
-         await sql`
+        await sql`
         INSERT INTO resultado (
             gradodepresion, 
             idestudiante, 
@@ -35,7 +34,7 @@ export async function POST(req, { params }) {
             CURRENT_DATE
         ) RETURNING *;
         `;
-
+        console.log("Se guardo los datos del usuario")
         return NextResponse.json("Se realizo la consulta bien - 200");
     } catch (error) {
         console.error("Error en el POST:", error);

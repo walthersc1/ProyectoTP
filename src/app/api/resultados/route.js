@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req, { params }) {
     try {
-        console.log("Entro al post");
         const datos = await req.json();
         console.log(datos);
         let contador = 0;
@@ -31,7 +30,6 @@ export async function POST(req, { params }) {
                 consulta += "where lower(e.nombre || ' ' || e.apellido) LIKE lower($" + contador + ")";
             }
             values.push(`%${datos.nombre}%`);
-            console.log(values)
         }
         if (datos.codigo) {
             contador += 1;
@@ -42,6 +40,7 @@ export async function POST(req, { params }) {
             }
             values.push(datos.codigo);
         }
+
         //console.log(consulta)
         const res = await sql.query(consulta, values);
         const dataset = res.rows;

@@ -1,21 +1,20 @@
 "use client";
 import React from 'react'
-import { Images } from '@/components/imagenes'
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
-
 import axios from 'axios';
 import { useState, useEffect, useRef } from 'react';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function TextProcessor() {
   let contado = 1;
   const messageEndRef = useRef(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isDisabled, setIsDisabled] = useState(false);
-  const [userResult, setUserResult] = useState([]);
   const [totalResult, setTotalResult] = useState(0);
   const [data, setdata] = useState({
     gradodepresion: "",
-    idestudiante: "",//que este dato no este a fuego
+    idestudiante: "",
     respuesta1: "",
     respuesta2: "",
     respuesta3: "",
@@ -42,9 +41,10 @@ export default function TextProcessor() {
     'Generando diagnostico . . .'
   ]);
   const [botResponseIndex, setBotResponseIndex] = useState(0);
-  const [messageCount, setMessageCount] = useState(0);
 
-  const isFirstLoad = useRef(true); // Utilizamos useRef para mantener el estado de isFirstLoad
+
+
+  const isFirstLoad = useRef(true);
 
   const handleChange = (event) => {
     setInput(event.target.value);
@@ -65,7 +65,6 @@ export default function TextProcessor() {
     setMessages([...messages, userMessage]);
     setInput('');
 
-    console.log(data)
     const response = await axios.get('https://tpalgoritmo-production.up.railway.app/predict/', {
       params: {
         text: userMessage.text
@@ -81,83 +80,94 @@ export default function TextProcessor() {
 
 
     if (botResponseIndex > 1 && botResponseIndex < 11) {
-      const string = "respuesta" + (botResponseIndex - 1)
-
+      const nombreAtributo = "respuesta" + (botResponseIndex - 1)
+      console.log("La etiqueta q se esta tomando es: " + nombreAtributo + " index: " + botResponseIndex + " respuesta: " + userMessage.text + " Suma actual: " + totalResult)
       setdata({
         ...data,
-        [string]: userMessage.text,
+        [nombreAtributo]: userMessage.text,
       });
       setTotalResult(prevTotal => prevTotal + number);
       contado += 1;
     }
     if (botResponseIndex === 10) {
-
+      let grado = "";
       setIsDisabled(true);
+      console.log("Entrando a generar resultado resultado: " + totalResult)
       switch (true) {
         case totalResult < 5:
-          setUserResult('Minima');
+          grado = "Minima"
           break;
         case totalResult < 10:
-          setUserResult('Leve');
+          grado = 'Leve'
           break;
         case totalResult < 15:
-          setUserResult('Moderada');
+          grado = 'Moderada'
           break;
         case totalResult < 20:
-          setUserResult('Moderadamente severa');
+          grado = 'Moderadamente severa'
           break;
         default:
-          setUserResult('Severa');
+          grado = 'Severa'
           break;
       }
-
-
+      setdata({
+        ...data,
+        gradodepresion: grado,
+        respuesta9: userMessage.text,
+      })
     }
-
-
-    // Simular respuesta del bot
     handleBotResponse();
   };
 
-  const mostrarREsultado = async (event) => {
-    setdata({
-      ...data,
-      gradodepresion: userResult,
-    })
-    const respuesta = await axios.post('/api/chatbot', data)
-
-    onOpen();
-  };
 
 
   useEffect(() => {
+    const mostrarREsultado = async (event) => {
+
+      const respuesta = await axios.post('/api/chatbot', data)
+      if (respuesta.status == 200) {
+        toast.success('Se guardaro sus respuesta de manera corracta');
+      } else {
+        toast.error('Se genero un error al momento de guardar sus respuestas')
+      }
+    };
+    if (data.gradodepresion !== "" ) {
+      console.log("Entrando a guardar resultado ****")
+      mostrarREsultado();
+    }
+
+  }, [data.gradodepresion]);
 
 
+
+  useEffect(() => {
     if (isFirstLoad.current) {
       handleBotResponse();
-      isFirstLoad.current = false; // Marcar que la carga inicial ya se realizó      
+      isFirstLoad.current = false;
     }
     if (messageEndRef.current) {
       messageEndRef.current.scrollTop = messageEndRef.current.scrollHeight;
     }
+  }, [messages]);
 
+
+  useEffect(() => {
     const consultaUsuario = async () => {
       try {
         const datos = await axios.get('/api/getToken')
         const correo = datos.data.email
         const usuario = await axios.get(`/api/queries/${correo}`)
-        console.log("Entrando a setear la data")
-        setdata({
-          ...data,
+        setdata((prevData) => ({
+          ...prevData,
           idestudiante: (usuario.data.usuarios[0].idestudiante),
-        });
+        }));
       } catch (error) {
         console.error('Error al obtener la información del usuario:', error);
       }
     };
-    consultaUsuario()
-  }, [messages]); // Se ejecuta solo una vez al inicio
 
+    consultaUsuario();
+  }, []);
 
   return (
     <section className="flex justify-center pt-12 pb-12 h-fit">
@@ -195,9 +205,10 @@ export default function TextProcessor() {
           <button disabled={isDisabled} type="submit" className="bg-blue-500 text-white p-2 rounded-r-lg">Enviar</button>
         </form>
         {botResponseIndex == 11 && (
-          <button onClick={mostrarREsultado} className='bg-teal-400 rounded lg w-1/2 self-center p-2 mb-3'>Visualizar Resultados</button>
+          <button onClick={onOpen} className='bg-teal-400 rounded lg w-1/2 self-center p-2 mb-3'>Visualizar Resultados</button>
 
         )}
+        <ToastContainer />
       </div>
       <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='3xl' scrollBehavior='inside'>
         <ModalContent>
@@ -211,10 +222,10 @@ export default function TextProcessor() {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+                <Button color="danger" variant="light" onClick={onClose}>
                   Close
                 </Button>
-                <button color="primary" onPress={onClose}>
+                <button color="primary" >
                   <a href='/Contactar'> Agendar Cita</a>
                 </button>
               </ModalFooter>

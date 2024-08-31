@@ -6,8 +6,6 @@ import axios from "axios";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
 
 export default function InfoPersonal() {
-
-    const id = 2;
     const consultaUsuario = async (e) => {
         const data = await axios.get('/api/getToken')
         const correo = data.data.email
