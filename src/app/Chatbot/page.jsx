@@ -59,7 +59,7 @@ export default function TextProcessor() {
 
   const actualizarDatos = async (e) => {
     e.preventDefault();
-    console.log("Se envio la respuesta")
+    //console.log("Se envio la respuesta")
     const userMessage = { text: input, sender: 'user' };
 
     setMessages([...messages, userMessage]);
@@ -81,7 +81,7 @@ export default function TextProcessor() {
 
     if (botResponseIndex > 1 && botResponseIndex < 11) {
       const nombreAtributo = "respuesta" + (botResponseIndex - 1)
-      console.log("La etiqueta q se esta tomando es: " + nombreAtributo + " index: " + botResponseIndex + " respuesta: " + userMessage.text + " Suma actual: " + totalResult)
+      //console.log("La etiqueta q se esta tomando es: " + nombreAtributo + " index: " + botResponseIndex + " respuesta: " + userMessage.text + " Suma actual: " + totalResult)
       setdata({
         ...data,
         [nombreAtributo]: userMessage.text,
@@ -217,7 +217,7 @@ export default function TextProcessor() {
               <ModalHeader className="flex flex-col gap-1">Diagnostico de cuestionario</ModalHeader>
               <ModalBody>
                 <div className='grid grid-cols-2'>
-                  <h2>{userResult}</h2>
+                  <h2>{data.gradodepresion}</h2>
                   <h2>{totalResult}</h2>
                 </div>
               </ModalBody>

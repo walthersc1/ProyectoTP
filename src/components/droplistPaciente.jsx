@@ -1,9 +1,8 @@
 "use client"
 import React from "react";
 import {DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, DropdownSection, User, Button,Link} from "@nextui-org/react";
-import Image from "next/image";
 import { Images } from '@/components/imagenes'
-
+import axios from "axios";
 
 export default function DroplistPaciente () {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -14,6 +13,12 @@ export default function DroplistPaciente () {
         "Integrations",
         "Open Menu",
     ];
+
+    const logout = async () => {
+        await axios.post("/api/getToken/logout")
+        window.location.reload();
+    }
+
 
   return (
     <>
@@ -80,7 +85,7 @@ export default function DroplistPaciente () {
             <DropdownItem key="help_and_feedback" endContent={Images.feedback}>
                 Help & Feedback
             </DropdownItem>
-            <DropdownItem key="logout" endContent={Images.logout}>
+            <DropdownItem key="logout" endContent={Images.logout} onPress={logout}>
                 Log Out</DropdownItem>
             </DropdownSection> 
         </DropdownMenu>
