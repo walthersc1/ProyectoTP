@@ -19,29 +19,29 @@ export async function POST(req, { params }) {
         // Agregar condiciones dinámicamente según los parámetros no nulos o vacíos
         if (datos.estado) {
             contador += 1;
-            consulta += "where LOWER(r.gradodepresion) = LOWER($" + contador + ")";
+            consulta += " where LOWER(r.gradodepresion) = LOWER($" + contador + ")";
             values.push(datos.estado);
         }
         if (datos.nombre) {
             contador += 1;
             if (contador > 1) {
-                consulta += "and lower(e.nombre || ' ' || e.apellido) LIKE lower($" + contador + ")";
+                consulta += " and lower(e.nombre || ' ' || e.apellido) LIKE lower($" + contador + ")";
             } else {
-                consulta += "where lower(e.nombre || ' ' || e.apellido) LIKE lower($" + contador + ")";
+                consulta += " where lower(e.nombre || ' ' || e.apellido) LIKE lower($" + contador + ")";
             }
             values.push(`%${datos.nombre}%`);
         }
         if (datos.codigo) {
             contador += 1;
             if (contador > 1) {
-                consulta += "and e.codestudiante = $" + contador;
+                consulta += " and lower(e.codestudiante) LIKE lower($" + contador + ")";
             } else {
-                consulta += "where e.codestudiante = $" + contador;
+                consulta += " where lower(e.codestudiante) LIKE lower($" + contador + ")";
             }
-            values.push(datos.codigo);
+            values.push(`%${datos.codigo}%`);
         }
-
-        //console.log(consulta)
+        console.log(values)
+        console.log(consulta)
         const res = await sql.query(consulta, values);
         const dataset = res.rows;
 

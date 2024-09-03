@@ -34,6 +34,7 @@ export default function AgendarCita() {
 
   const handleDateChange = (event) => {
     const { name, value } = event.target;
+    console.log("nombre: " + name + " , valor: " + value)
     setdatosCita({
       ...datosCita,
       [name]: value,
@@ -90,8 +91,9 @@ export default function AgendarCita() {
       if (await validarDatos()) {
         console.log("true");
 
+        console.log(datosCita)
+        const respuest = await axios.put('/api/agregarcita', datosCita);
         toast.success('Cita guardada satisfactoriamente');
-        await axios.put('/api/agregarcita', datosCita);
         consultaUsuario(); // Opcional: Actualizar la lista de citas después de guardar una cita
       } else {
         console.log("false");

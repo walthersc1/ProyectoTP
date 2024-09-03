@@ -7,7 +7,7 @@ export async function POST(req, { params }) {
         const datos = await req.json();
         const values = [];
         let contador = 1;
-
+        //console.log(datos)
         let consulta = `
             select idcita, 
             (d.nombre || ' ' || d.apellido) nombre,
@@ -18,26 +18,27 @@ export async function POST(req, { params }) {
             c.fecha
             from cita c inner join docentes d on c.iddocente = d.iddocente 
             inner join estudiantes e on e.idestudiante = c.idestudiante
-            where e.codestudiante = $` + 1;
+            where e.codestudiante = $1`;
 
         values.push(datos.codigo);
 
         if (datos.codcita) {
             contador += 1;
-            consulta += " and LOWER(c.idcita) = $" + contador + " ";
-            values.push(datos.estado);
+            consulta += " and c.idcita = $" + contador + " ";
+            values.push(datos.codcita);
         }
         if (datos.nombre) {
             contador += 1;
-            consulta += "and lower(d.nombre || ' ' || d.apellido) LIKE lower($" + contador + ")";
+            consulta += " and lower(d.nombre || ' ' || d.apellido) LIKE lower($" + contador + ")";
             values.push(`%${datos.nombre}%`);
         }
         if (datos.fecha) {
             contador += 1;
-            consulta += "and c.fecha = $" + contador;
+            consulta += " and c.fecha = $" + contador;
             values.push(datos.fecha);
         }
-
+        console.log(values)
+        console.log(consulta)
         const res = await sql.query(consulta, values);
         const dataset = res.rows;
         return NextResponse.json(dataset);

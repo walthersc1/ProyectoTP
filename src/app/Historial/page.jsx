@@ -9,7 +9,7 @@ export default function Historial() {
   const [getResultado, setResultado] = useState([]);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [modalData, setModalData] = useState(null);
-  const [datosEstudiante,setdatosEstudiante] = useState({
+  const [datosEstudiante, setdatosEstudiante] = useState({
     codigo: "",
   });
   useEffect(() => {
@@ -18,11 +18,11 @@ export default function Historial() {
       const correo = data.data.email
       const usuario = await axios.get(`/api/queries/${correo}`)
       setdatosEstudiante({
-        codigo:usuario.data.usuarios[0].codestudiante,
+        codigo: usuario.data.usuarios[0].codestudiante,
       })
-  };
-  obtenerDatosUsuario()
-  
+    };
+    obtenerDatosUsuario()
+
   }, []);
 
 
@@ -42,6 +42,7 @@ export default function Historial() {
     try {
       console.log("Entrando a generar popup");
       const response = await axios.post('/api/resultados/obtenerDetalle', JSON.stringify(idestudiante));
+      console.log(response.data)
       setModalData(response.data);
       onOpen();
     } catch (error) {
@@ -102,16 +103,10 @@ export default function Historial() {
                         </div>
                       </div>
                       <div className="flex-col p-3 gap-2">
-                        <h3 className="text-left text-black font-semibold">Estado de depresión</h3>
+                        <h3 className="text-left text-black font-semibold">Grado de depresión</h3>
                         <div className="flex bg-slate-400 rounded-lg p-3 gap-3">
                           {Images.level}
-                          <select value={modalData.gradodepresion} readOnly className="w-full bg-slate-400 rounded-md py-1.5 text-gray-900 sm:text-sm sm:leading-6 p-3">
-                            <option value="Minima">Minima</option>
-                            <option value="Leve">Leve</option>
-                            <option value="Moderada">Moderada</option>
-                            <option value="Moderamente Grave">Moderamente Grave</option>
-                            <option value="Grave">Grave</option>
-                          </select>
+                          <input type="text" value={modalData.gradodepresion} readOnly className='w-full bg-slate-400 rounded-md py-1 text-gray-900 sm:text-sm sm:leading-6 p-3' />
                         </div>
                       </div>
                       <div className="flex-col p-3 gap-2">

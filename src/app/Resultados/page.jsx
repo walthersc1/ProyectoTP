@@ -32,7 +32,8 @@ export default function Resultados() {
   };
 
   useEffect(() => {
-  }, [handleDateChange]);
+    obtenerResultados()
+  }, [getFiltro]);
 
   const fetchModalData = async (idestudiante) => {
     try {
@@ -144,16 +145,10 @@ export default function Resultados() {
                           </div>
                         </div>
                         <div className="flex-col p-3 gap-2">
-                          <h3 className="text-left text-black font-semibold">Estado de depresión</h3>
+                          <h3 className="text-left text-black font-semibold">Grado de depresión</h3>
                           <div className="flex bg-slate-400 rounded-lg p-3 gap-3">
                             {Images.level}
-                            <select value={modalData.gradodepresion} readOnly className="w-full bg-slate-400 rounded-md py-1.5 text-gray-900 sm:text-sm sm:leading-6 p-3">
-                              <option value="Minima">Minima</option>
-                              <option value="Leve">Leve</option>
-                              <option value="Moderada">Moderada</option>
-                              <option value="Moderamente Grave">Moderamente Grave</option>
-                              <option value="Grave">Grave</option>
-                            </select>
+                            <input type="text" value={modalData.gradodepresion} readOnly className='w-full bg-slate-400 rounded-md py-1 text-gray-900 sm:text-sm sm:leading-6 p-3' />
                           </div>
                         </div>
                         <div className="flex-col p-3 gap-2">
