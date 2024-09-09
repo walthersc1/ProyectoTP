@@ -34,7 +34,7 @@ export default function AgendarCita() {
 
   const handleDateChange = (event) => {
     const { name, value } = event.target;
-    console.log("nombre: " + name + " , valor: " + value)
+    //console.log("nombre: " + name + " , valor: " + value)
     setdatosCita({
       ...datosCita,
       [name]: value,
@@ -81,6 +81,9 @@ export default function AgendarCita() {
     if (!datosCita.horafin.trim()) {
       validationErrors.horafin = "Ingresar la hora de fin de la cita";
     }
+    if(datosCita.horainicio > datosCita.horafin){
+      return false
+    }
     setErrors(validationErrors);
     return Object.keys(validationErrors).length === 0;
   };
@@ -89,18 +92,20 @@ export default function AgendarCita() {
     e.preventDefault();
     try {
       if (await validarDatos()) {
-        console.log("true");
 
         console.log(datosCita)
-        const respuest = await axios.put('/api/agregarcita', datosCita);
+        const respuesta = await axios.put('/api/agregarcita', datosCita);
         toast.success('Cita guardada satisfactoriamente');
-        consultaUsuario(); // Opcional: Actualizar la lista de citas después de guardar una cita
+        consultaUsuario();
       } else {
-        console.log("false");
         toasterror('Por favor verificar los datos de entrada');
       }
     } catch (error) {
-      console.error('Error saving data:', error);
+      if (error.response.status == 405) {
+        toasterror((error.response.data.error))
+      } else {
+        console.error('Error saving data:', error);
+      }
     }
   };
 
@@ -125,7 +130,7 @@ export default function AgendarCita() {
       console.log("Entrando a buscar datos iniciales");
       consultaUsuario();
     }
-  }, [datosCita.iddocente,datosCita.fecha]);
+  }, [datosCita.iddocente, datosCita.fecha]);
 
 
   return (

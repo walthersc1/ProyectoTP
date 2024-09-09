@@ -34,7 +34,8 @@ export async function POST(req, { params }) {
         coddocente = ${datos.coddocente},
         fechanacimiento = ${datos.fechanacimiento},
         horainicio = ${datos.horainicio},
-        horafin = ${datos.horafin}
+        horafin = ${datos.horafin},
+        estado = ${datos.estado}
     WHERE
         iddocente = ${datos.iddocente};`
 

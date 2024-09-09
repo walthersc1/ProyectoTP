@@ -3,6 +3,7 @@
 import React from 'react'
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
 
 export default function InfoPsicologo() {
     const consultaUsuario = async (e) => {
@@ -11,7 +12,7 @@ export default function InfoPsicologo() {
         const usuario = await axios.get(`/api/docente/${correo}`)
         return usuario.data.psicologo[0];
     };
-
+    const { isOpen: isOpenEliminar, onClose: cerrarEliminar, onOpen: onOpenEliminar, onOpenChange: onOpenChangeEliminar } = useDisclosure();
     const [valoresInput, setValoresInput] = useState({
         iddocente: "",
         nombre: "",
@@ -25,6 +26,7 @@ export default function InfoPsicologo() {
         disponibilidad: "",
         horainicio: "",
         horafin: "",
+        estado: "",
     });
 
     useEffect(() => {
@@ -43,13 +45,13 @@ export default function InfoPsicologo() {
                 disponibilidad: res.disponibilidad,
                 horainicio: res.horainicio,
                 horafin: res.horafin,
+                estado: "true"
             });
         });
     }, []);
 
     const handleChange = async (event) => {
         const { name, value } = event.target;
-        //console.log(name + "-" + value);
         setValoresInput({
             ...valoresInput,
             [name]: value,
@@ -57,13 +59,33 @@ export default function InfoPsicologo() {
     };
 
 
+
     const actualizarDatos = async (e) => {
         e.preventDefault();
-        console.log("front end -----")
-        console.log(valoresInput)
-        axios.post(`/api/docente/${id}`, valoresInput);
+        axios.post(`/api/docente/${valoresInput.correo}`, valoresInput);
     };
+    const darDebajaCuenta = async (event) => {
+        axios.post(`/api/docente/${valoresInput.correo}`, valoresInput);
+        await axios.post("/api/getToken/logout")
+        window.location.reload();
+    }
 
+    const CerarModalDarDeBaja = (e) => {
+        setValoresInput({
+            ...valoresInput,
+            estado: 'true',
+        });
+        cerrarEliminar()
+    }
+
+    const abrirModalDarDeBajaCuenta = (e) => {
+        e.preventDefault()
+        setValoresInput({
+            ...valoresInput,
+            estado: 'false',
+        });
+        onOpenEliminar(e)
+    }
 
     return (
         <form>
@@ -267,14 +289,44 @@ export default function InfoPsicologo() {
                             <div className="border-t-4 mx-3 p-2 border-gray-300"></div>
                             <h2 className="font-medium pb-3">Eliminar cuenta de psicologo</h2>
                             <div className="mt-2 font-bold">
-                                <button className="font-sans text-white bg-red-500 w-full rounded-lg border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:max-w-xs sm:text-sm sm:leading-6 p-3">
-                                    <a href="/Eliminar">Eliminar cuenta</a>
+                                <button onClick={abrirModalDarDeBajaCuenta} className="font-sans text-white bg-red-500 w-full rounded-lg border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:max-w-xs sm:text-sm sm:leading-6 p-3">
+                                    <a >Eliminar cuenta</a>
                                 </button>
                             </div>
                         </div>
 
                     </div>
+
+
+
                 </div>
+
+
+                <Modal isOpen={isOpenEliminar} onOpenChange={onOpenChangeEliminar} size='3xl' scrollBehavior='inside'>
+                    <ModalContent>
+                        {(CerarModalDarDeBaja) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1">Confirmación</ModalHeader>
+                                <ModalBody>
+                                    <div className='flex justify-center'>
+                                        <p className="text-center font-bold underline-offset-4">
+                                            ¿Seguro que quiere dar de baja su cuenta? no se eliminar su información personal solo se dashabilitara su usuario
+                                        </p>
+                                    </div>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="primary" variant="light" onPress={CerarModalDarDeBaja} >
+                                        Cerrar
+                                    </Button>
+                                    <Button color="danger" variant="light" onPress={darDebajaCuenta}>
+                                        Aceptar
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
+                </Modal>
+
 
             </div>
 

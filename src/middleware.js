@@ -3,14 +3,14 @@ import { jwtVerify } from 'jose'
 import {serialize} from "cookie"
 
 export const config = {
-    matcher: ['/InfoPersonal', '/Cantactar', '/Chatbot', '/Historial', '/Agenda', '/InfoPsicologo', '/Resultados', '/Dashboard', '/AgregarCita'],
+    matcher: ['/InfoPersonal', '/Contactar', '/Chatbot', '/Historial', '/Agenda', '/InfoPsicologo', '/Resultados', '/Dashboard', '/AgregarCita'],
 }
 
 
 export async function middleware(req) {
     console.log('Entrando a middle')
     const cookieHeader = req.cookies.get('MyTokenUser')
-    const array_estudiante = ['/InfoPersonal', '/Cantactar', '/Chatbot', '/Historial', '/Agenda']
+    const array_estudiante = ['/InfoPersonal', '/Contactar', '/Chatbot', '/Historial', '/Agenda']
     const array_psicologo = ['/InfoPsicologo', '/Resultados', '/Dashboard', '/AgregarCita']
     const uriactual = req.nextUrl.pathname;
 
