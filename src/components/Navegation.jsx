@@ -1,8 +1,9 @@
 "use client"
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Button, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, DropdownSection, User } from "@nextui-org/react";
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, Link, Button, DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, DropdownSection, User } from "@nextui-org/react";
 import React from "react";
 import DroplistPaciente from "@/components/droplistPaciente";
 import DroplistPsicologo from "@/components/DroplistPsicologo";
+import Leftnav from "@/components/leftnav"
 import { useRouter } from 'next/navigation';
 import { Images } from '@/components/imagenes'
 import axios from "axios";
@@ -54,17 +55,7 @@ export default function Navegation(req, { children }) {
         </NavbarContent>
         {userType.rol === 'Estudiante' && <NavbarContent justify="end"> <DroplistPaciente /> </NavbarContent>}
         {userType.rol === 'Docente' && <NavbarContent justify="end"> <DroplistPsicologo /> </NavbarContent>}
-        
-          <NavbarContent justify="end" className={`${userType.auth ? 'hidden':''}`}>
-            <NavbarItem className="hidden md:block">
-              <Link href="/Login">Login</Link>
-            </NavbarItem>
-            <NavbarItem>
-              <Button as={Link} color="primary" href="/Registrar" variant="flat">
-                Sign Up
-              </Button>
-            </NavbarItem>
-          </NavbarContent>
+        {!userType.auth && <Leftnav/>}
         
 
       </Navbar>

@@ -6,13 +6,6 @@ import axios from "axios";
 
 export default function DroplistPaciente () {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  
-    const menuItems = [
-        "Inicio",
-        "About us",
-        "Integrations",
-        "Open Menu",
-    ];
 
     const logout = async () => {
         await axios.post("/api/getToken/logout")
