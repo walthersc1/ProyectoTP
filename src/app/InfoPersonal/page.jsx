@@ -17,7 +17,7 @@ export default function InfoPersonal() {
         return usuario.data;
     };
     const [carreras, setCarreras] = useState([]);
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
     const [errors, setErrors] = useState({})
     const { isOpen: isOpenEliminar, onClose: cerrarEliminar, onOpen: onOpenEliminar, onOpenChange: onOpenChangeEliminar } = useDisclosure();
     const [values, setValoresInput] = useState({
@@ -106,7 +106,7 @@ export default function InfoPersonal() {
     const actualizarDatos = async (event) => {
         if (handleSubmit()) {
             event.preventDefault()
-            //await axios.post(`/api/queries/`, values);
+            await axios.post(`/api/queries/`, values);
             toast.success("Se guardaron los cambios")
         }
     };
@@ -185,6 +185,7 @@ export default function InfoPersonal() {
                     const respuesta = await axios.put('/api/queries/contrasena/', values);
                     if (respuesta.status) {
                         toast.success(respuesta.data.message)
+                        onClose()
                     }
                 } else {
                     //Personalisar mejor la contraseña

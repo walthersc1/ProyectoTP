@@ -9,20 +9,21 @@ import axios from "axios";
 
 export default function Navegation(req, { children }) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const [userType, setUserType] = React.useState(null);
+  const [userType, setUserType] = React.useState({ rol: "", auth: false });
   const route = useRouter();
   React.useEffect(() => {
-
     const fetchData = async () => {
       try {
         const reqs = await axios.get('/api/getToken');
         const { tipo } = reqs.data;
-        setUserType(tipo);
+        if (tipo) {
+          setUserType({ rol: tipo, auth: true });
+        }
       } catch (error) {
-        if(error.response.status == 500){
+        if (error.response.status == 500) {
           route.replace('/Login');
         }
-        
+
       }
     };
 
@@ -50,19 +51,21 @@ export default function Navegation(req, { children }) {
           <NavbarItem>
             <Link color="foreground" href="/Funciones">Funciones </Link>
           </NavbarItem>
-          {userType === 'Estudiante' && <DroplistPaciente />}
-          {userType === 'Docente' && <DroplistPsicologo />}
         </NavbarContent>
-        <NavbarContent justify="end">
-          <NavbarItem className="hidden md:block">
-            <Link href="/Login">Login</Link>
-          </NavbarItem>
-          <NavbarItem>
-            <Button as={Link} color="primary" href="/Registrar" variant="flat">
-              Sign Up
-            </Button>
-          </NavbarItem>
-        </NavbarContent>
+        {userType.rol === 'Estudiante' && <NavbarContent justify="end"> <DroplistPaciente /> </NavbarContent>}
+        {userType.rol === 'Docente' && <NavbarContent justify="end"> <DroplistPsicologo /> </NavbarContent>}
+        
+          <NavbarContent justify="end" className={`${userType.auth ? 'hidden':''}`}>
+            <NavbarItem className="hidden md:block">
+              <Link href="/Login">Login</Link>
+            </NavbarItem>
+            <NavbarItem>
+              <Button as={Link} color="primary" href="/Registrar" variant="flat">
+                Sign Up
+              </Button>
+            </NavbarItem>
+          </NavbarContent>
+        
 
       </Navbar>
       {children}
