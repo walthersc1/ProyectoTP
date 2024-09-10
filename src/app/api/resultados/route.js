@@ -12,9 +12,10 @@ export async function POST(req, { params }) {
         let consulta = `
         SELECT e.codestudiante, (e.nombre || ' ' || e.apellido) AS nombre, r.idresultado,
          TO_CHAR(r.fechacreacion, 'DD/MM/YYYY') AS fechacreacion
-         ,r.gradodepresion,e.edad 
+         ,r.gradodepresion,e.edad, c.carrera
         FROM resultado r
-        INNER JOIN estudiantes e ON r.idestudiante = e.idestudiante `;
+        INNER JOIN estudiantes e ON r.idestudiante = e.idestudiante 
+        INNER JOIN carrera c ON c.idcarrera = e.codcarrera`;
 
         // Agregar condiciones dinámicamente según los parámetros no nulos o vacíos
         if (datos.estado) {

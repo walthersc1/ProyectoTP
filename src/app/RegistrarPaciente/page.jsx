@@ -69,7 +69,7 @@ export default function RegistrarPaciente() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = {};
-
+console.log(values)
         // personalisar mas los mensaje de error para nombre y apellido, la segunda condicion del if
         if (!values.nombre.trim() || !values.nombre.includes(" ")) {
             validationErrors.nombre = "Introdusca sus nombres"
@@ -135,12 +135,8 @@ export default function RegistrarPaciente() {
 
                 console.log("Entrando a la consulta")
                 const result = await axios.put(`/api/queries`, values)
-                console.log(result)
-
+                toast.success("Se actualizo los datos de manera correcta")
             }
-            console.log("Entrnado a redirigir")
-            //route.push('/');
-
         } catch (error) {
             console.log(error.response)
             if (error.response.status == 500) {

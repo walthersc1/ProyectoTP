@@ -126,7 +126,7 @@ export default function TextProcessor() {
 
       const respuesta = await axios.post('/api/chatbot', data)
       if (respuesta.status == 200) {
-        toast.success('Se guardaro sus respuesta de manera corracta');
+        toast.success('Se guardado sus respuesta de manera correcta');
       } else {
         toast.error('Se genero un error al momento de guardar sus respuestas')
       }

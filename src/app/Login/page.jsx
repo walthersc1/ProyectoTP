@@ -54,6 +54,7 @@ export default function Login() {
 
         setErrors(validationErrors)
         try {
+            console.log("Entrando a login")
             const response = await axios.post('/api/auth', values)
             if (response.status == 200) {
                 window.location.href = '/';

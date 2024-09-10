@@ -26,3 +26,7 @@ export default function Eliminar () {
     </section>
   )
 }
+
+
+
+

@@ -1,22 +1,26 @@
 "use client";
 
 import React from "react";
-import { useState, useEffect,preventDefault } from "react";
+import { useState, useEffect, preventDefault } from "react";
 import axios from "axios";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function InfoPersonal() {
     const consultaUsuario = async (e) => {
         const data = await axios.get('/api/getToken')
         const correo = data.data.email
-        console.log(correo)
+        //console.log(correo)
         const usuario = await axios.get(`/api/queries/${correo}`)
+        //console.log(usuario.data)
         return usuario.data;
     };
     const [carreras, setCarreras] = useState([]);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [errors, setErrors] = useState({})
     const { isOpen: isOpenEliminar, onClose: cerrarEliminar, onOpen: onOpenEliminar, onOpenChange: onOpenChangeEliminar } = useDisclosure();
-    const [valoresInput, setValoresInput] = useState({
+    const [values, setValoresInput] = useState({
         idestudiante: "",
         nombre: "",
         apellido: "",
@@ -28,7 +32,12 @@ export default function InfoPersonal() {
         fechanacimiento: "",
         fechacreacion: "",
         estado: "true",
+        ConstActual: "",
+        ConstNueva: "",
+        ConstConfirm: "",
     });
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    const año = new Date().getFullYear();
 
     useEffect(() => {
         consultaUsuario().then((res) => {
@@ -37,14 +46,17 @@ export default function InfoPersonal() {
                 idestudiante: res.usuarios[0].idestudiante,
                 nombre: res.usuarios[0].nombre,
                 apellido: res.usuarios[0].apellido,
-                numtelefono: res.usuarios[0].numtelefono,
-                edad: res.usuarios[0].edad,
+                numtelefono: String(res.usuarios[0].numtelefono),
+                edad: String(res.usuarios[0].edad),
                 correo: res.usuarios[0].correo,
                 codestudiante: res.usuarios[0].codestudiante,
-                codcarrera: res.usuarios[0].codcarrera,
+                codcarrera: String(res.usuarios[0].codcarrera),
                 fechanacimiento: res.usuarios[0].fechanacimiento.slice(0, 10),
                 fechacreacion: res.usuarios[0].fechacreacion,
                 estado: res.usuarios[0].estado,
+                ConstActual: "",
+                ConstNueva: "",
+                ConstConfirm: "",
             });
         });
 
@@ -65,13 +77,13 @@ export default function InfoPersonal() {
         const { name, value } = event.target;
 
         setValoresInput({
-            ...valoresInput,
+            ...values,
             [name]: value,
         });
     };
-    const CerarModalDarDeBaja = (e) =>{
+    const CerarModalDarDeBaja = (e) => {
         setValoresInput({
-            ...valoresInput,
+            ...values,
             estado: 'true',
         });
         cerrarEliminar()
@@ -79,27 +91,113 @@ export default function InfoPersonal() {
     const abrirModalDarDeBajaCuenta = (e) => {
         e.preventDefault()
         setValoresInput({
-            ...valoresInput,
+            ...values,
             estado: 'false',
         });
         onOpenEliminar(e)
     }
 
     const darDebajaCuenta = async (event) => {
-        axios.post(`/api/queries/`, valoresInput);
+        axios.post(`/api/queries/`, values);
         await axios.post("/api/getToken/logout")
         window.location.reload();
     }
 
     const actualizarDatos = async (event) => {
-        event.preventDefault()
-        axios.post(`/api/queries/`, valoresInput);
+        if (handleSubmit()) {
+            event.preventDefault()
+            //await axios.post(`/api/queries/`, values);
+            toast.success("Se guardaron los cambios")
+        }
     };
 
     const handleContactarClick = (e) => {
         e.preventDefault();
         onOpen();
     };
+
+
+    const handleSubmit = async (e) => {
+        const validationErrors = {};
+        console.log(values)
+        // personalisar mas los mensaje de error para nombre y apellido, la segunda condicion del if
+        if (!values.nombre.trim() || !values.nombre.includes(" ")) {
+            validationErrors.nombre = "Introdusca sus nombres"
+        }
+        if (!values.apellido.trim() || !values.apellido.includes(" ")) {
+            validationErrors.apellido = "Introdusca sus apellidos"
+        }
+
+        if (!values.edad.trim()) {
+            validationErrors.edad = "Introdusca su edad"
+        }
+
+        if (!values.codestudiante.trim()) {
+            validationErrors.codestudiante = "Introdusca su código de estudiante"
+        }
+        if (values.codestudiante.length > 11) {
+            validationErrors.codestudiante = "Código no valido, demasiados caracteres"
+        }
+
+        if (!values.codcarrera.trim()) {
+            validationErrors.codcarrera = "Introdusca su carrera"
+        }
+
+        if (!values.correo.trim()) {
+            validationErrors.correo = "Se requiere ingresar correo "
+        } else if (!regex.test(values.correo)) {
+            validationErrors.correo = "Correo no valido"
+        }
+
+        if (!values.numtelefono.trim()) {
+            validationErrors.numtelefono = "Se requiere ingresar un número de telefono"
+        } else if (isNaN(parseInt(values.numtelefono), 10) || values.numtelefono.length != 9) {
+            validationErrors.numtelefono = "Numero de telefóno no valido"
+        }
+
+        if (!values.fechanacimiento.trim()) {
+            validationErrors.fechanacimiento = "Debe de ingresar sus apellidos"
+        } else {
+            const edadPorFecha = año - parseInt(values.fechanacimiento.slice(0, 4))
+            if (values.edad != edadPorFecha) {
+                validationErrors.fechanacimiento = "La fecha no coincide con su edad "
+            }
+        }
+        if (parseInt(values.edad) > 99) {
+            validationErrors.edad = "Edad no valida"
+        }
+
+        setErrors(validationErrors)
+
+        if (Object.keys(validationErrors).length == 0) {
+            return true
+        } else {
+            return false
+        }
+
+    }
+    const modificarContraseña = async () => {
+        if (!values.ConstNueva.trim()) {
+            toast.error("Por favor ingresar una contraseña nueva")
+        } else {
+            try {
+                if (values.ConstNueva == values.ConstConfirm) {
+                    const respuesta = await axios.put('/api/queries/contrasena/', values);
+                    if (respuesta.status) {
+                        toast.success(respuesta.data.message)
+                    }
+                } else {
+                    //Personalisar mejor la contraseña
+                    toast.error("No coninciden las contraseñas")
+                }
+            } catch (error) {
+                console.error(error.response.data.message)
+                if (error.response.status == 404) {
+                    toast.error(error.response.data.message)
+                }
+            }
+        }
+    }
 
     return (
         <form>
@@ -122,8 +220,8 @@ export default function InfoPersonal() {
                                     autoComplete="given-name"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.nombre}
-                                />
+                                    value={values.nombre}
+                                /> {errors.nombre && <p className="text-red-400 text-left text-[13px]">{errors.nombre}</p>}
                             </div>
                         </div>
 
@@ -139,8 +237,8 @@ export default function InfoPersonal() {
                                     autoComplete="family-name"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.apellido}
-                                />
+                                    value={values.apellido}
+                                /> {errors.apellido && <p className="text-red-400 text-left text-[13px]">{errors.apellido}</p>}
                             </div>
                         </div>
 
@@ -156,8 +254,8 @@ export default function InfoPersonal() {
                                     autoComplete="address-level2"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.numtelefono}
-                                />
+                                    value={values.numtelefono}
+                                /> {errors.numtelefono && <p className="text-red-400 text-left text-[13px]">{errors.numtelefono}</p>}
                             </div>
                         </div>
 
@@ -173,8 +271,8 @@ export default function InfoPersonal() {
                                     autoComplete="address-level1"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.edad}
-                                />
+                                    value={values.edad}
+                                /> {errors.edad && <p className="text-red-400 text-left text-[13px]">{errors.edad}</p>}
                             </div>
                         </div>
 
@@ -190,8 +288,8 @@ export default function InfoPersonal() {
                                     autoComplete="birth-date"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.fechanacimiento}
-                                />
+                                    value={values.fechanacimiento}
+                                /> {errors.fechanacimiento && <p className="text-red-400 text-left text-[13px]">{errors.fechanacimiento}</p>}
                             </div>
                         </div>
 
@@ -206,8 +304,8 @@ export default function InfoPersonal() {
                                     id="student-code"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.codestudiante}
-                                />
+                                    value={values.codestudiante}
+                                /> {errors.codestudiante && <p className="text-red-400 text-left text-[13px]">{errors.codestudiante}</p>}
                             </div>
                         </div>
 
@@ -220,14 +318,14 @@ export default function InfoPersonal() {
                                     id="mayor"
                                     name="codcarrera"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:max-w-xs sm:text-sm sm:leading-6 p-3"
-                                    value={valoresInput.codcarrera}
+                                    value={values.codcarrera}
                                     onChange={handleChange}
                                 >
                                     <option value="0"></option>
                                     {carreras.map((row) => (
                                         <option key={row.idcarrera} value={row.idcarrera}>{row.carrera}</option>
                                     ))}
-                                </select>
+                                </select> {errors.codcarrera && <p className="text-red-400 text-left text-[13px]">{errors.codcarrera}</p>}
                             </div>
                         </div>
 
@@ -243,42 +341,11 @@ export default function InfoPersonal() {
                                     autoComplete="email"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.correo}
-                                />
+                                    value={values.correo}
+                                /> {errors.correo && <p className="text-red-400 text-left text-[13px]">{errors.correo}</p>}
                             </div>
                         </div>
 
-                        <div className="sm:col-span-4">
-                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                                Contraseña
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    id="contraseña"
-                                    name="contraseña"
-                                    type="password"
-                                    autoComplete="password"
-                                    placeholder="**********"
-                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="sm:col-span-4">
-                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                                Confirmar contraseña
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    id="contraseña"
-                                    name="contraseña"
-                                    type="password"
-                                    autoComplete="password"
-                                    placeholder="**********"
-                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                                />
-                            </div>
-                        </div>
 
                         <div className="sm:col-span-2 sm:col-start-2">
 
@@ -316,7 +383,7 @@ export default function InfoPersonal() {
                                 </button>
                             </div>
                         </div>
-
+                        <ToastContainer />
                     </div>
 
                     <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='3xl' scrollBehavior='inside'>
@@ -325,25 +392,69 @@ export default function InfoPersonal() {
                                 <>
                                     <ModalHeader className="flex flex-col gap-1">Información del psicologo</ModalHeader>
                                     <ModalBody>
-                                        <div className='grid grid-cols-2 gap-4'>
-                                            <h2 className="text-end font-bold pr-4">Correo electronico: </h2>
-                                            <p className="underline underline-offset-4 text-sky-500">prueba@upc.pe.pe</p>
-                                            <h2 className="text-end font-bold pr-4">Número de telefono: </h2>
-                                            <p className="text-sky-500">987456115</p>
+                                        <div className="sm:col-span-4">
+                                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                                Contreseña Actual
+                                            </label>
+                                            <div className="mt-2">
+                                                <input
+                                                    id="contraseña"
+                                                    name="ConstActual"
+                                                    type="password"
+                                                    autoComplete="password"
+                                                    placeholder="**********"
+                                                    onChange={handleChange}
+                                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                                />
+                                            </div>
+                                        </div>
 
+                                        <div className="sm:col-span-4">
+                                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                                Nueva Contraseña
+                                            </label>
+                                            <div className="mt-2">
+                                                <input
+                                                    id="contraseña"
+                                                    name="ConstNueva"
+                                                    type="password"
+                                                    autoComplete="password"
+                                                    placeholder="**********"
+                                                    onChange={handleChange}
+                                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="sm:col-span-4">
+                                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                                Confirmar contraseña
+                                            </label>
+                                            <div className="mt-2">
+                                                <input
+                                                    id="contraseña"
+                                                    name="ConstConfirm"
+                                                    type="password"
+                                                    autoComplete="password"
+                                                    placeholder="**********"
+                                                    onChange={handleChange}
+                                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                                />
+                                            </div>
                                         </div>
                                     </ModalBody>
                                     <ModalFooter>
                                         <Button color="danger" variant="light" onPress={onClose}>
-                                            Close
+                                            Cancelar
                                         </Button>
-                                        <Button color="primary" onPress={onClose}>
-                                            Agendar Cita
+                                        <Button color="primary" onPress={modificarContraseña}>
+                                            Modificar Contraseña
                                         </Button>
                                     </ModalFooter>
                                 </>
                             )}
                         </ModalContent>
+
                     </Modal>
                     <Modal isOpen={isOpenEliminar} onOpenChange={onOpenChangeEliminar} size='3xl' scrollBehavior='inside'>
                         <ModalContent>

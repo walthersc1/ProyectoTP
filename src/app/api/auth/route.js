@@ -3,11 +3,12 @@ import jwt from 'jsonwebtoken'
 import { sql } from '@vercel/postgres';
 import { serialize } from 'cookie';
 import bcrypt from 'bcrypt';
+import ContactarPsicologo from '@/app/Contactar/page';
 
 export async function POST(req) {
     try {
         const { email, password } = await req.json();
-
+//console.log(email + " / " + password )
         const resultado = await sql`
             SELECT idestudiante as cod, correo, contraseña, estado,'Estudiante' as tipo
             FROM estudiantes
@@ -18,15 +19,15 @@ export async function POST(req) {
             WHERE correo = ${email}
         `;
 
-        const compracion = await bcrypt.compare(password, resultado.rows[0].contraseña)
+        if (resultado.rowCount === 0) {
+            console.log("Correo no existe")
+            return NextResponse.json({ error: 'Correo no encontrado' }, { status: 404 });
+        }
         
+        const compracion = await bcrypt.compare(password, resultado.rows[0].contraseña)
         if (compracion == false) {
             return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 404 });
         }
-        if (resultado.rowCount === 0) {
-            return NextResponse.json({ error: 'Correo no encontrado' }, { status: 404 });
-        }
-
         if(!resultado.rows[0].estado){
             return NextResponse.json({ error: 'Usuario dado de baja' }, { status: 404 });
         }

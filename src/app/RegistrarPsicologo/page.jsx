@@ -1,20 +1,22 @@
 'use client'
 import axios from 'axios';
 import React, { useState } from 'react';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RegistrarPsicologo() {
     const año = new Date().getFullYear();
-    const actualizarDatos = async (e) => {
+    /*const actualizarDatos = async (e) => {
         e.preventDefault();
         axios.PUT(`/api/docente/${1}`, values);
-    };
+    };*/
 
     const [values, setValues] = useState({
         nombre: "",
         apellido: "",
         numtelefono: "",
         edad: "",
-        correo: "",
+        email: "",
         coddocente: "",
         fechanacimiento: "",
         password: '',
@@ -30,8 +32,32 @@ export default function RegistrarPsicologo() {
         const { name, value } = e.target;
         setValues({ ...values, [name]: value })
     }
-
-    const handleSubmit = (e) => {
+    const inicioSesion = async (e) => {
+        try {
+            const response = await axios.post('/api/auth', values)
+            if (response.status == 200) {
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    const GuardarRegistor = async (e) => {
+        e.preventDefault()
+        try {
+            const resultado = await axios.put(`/api/docente/`, values)
+            console.log(resultado.status)
+            if (resultado.status == 200) {
+                inicioSesion()
+            }
+        } catch (error) {
+            console.log(error.response)
+            if (error.response.status == 404) {
+                toast.error(error.response.data.error)
+            }
+        }
+    }
+    const handleSubmit = async (e) => {
         e.preventDefault()
         const validationErrors = {}
         console.log(values)
@@ -52,15 +78,15 @@ export default function RegistrarPsicologo() {
             validationErrors.edad = "Introdusca su edad"
         }
 
-        if (!values.correo.trim()) {
-            validationErrors.correo = "Introducsca su correo"
-        } else if (!regex.test(values.correo)) {
-            validationErrors.correo = "Correo no valido"
+        if (!values.email.trim()) {
+            validationErrors.email = "Introducsca su correo"
+        } else if (!regex.test(values.email)) {
+            validationErrors.email = "Correo no valido"
         }
 
         if (!values.numtelefono.trim()) {
             validationErrors.numtelefono = "Se requiere ingresar un número de telefono"
-        } else if (!Number.isFinite(Number(values.numtelefono))   || values.numtelefono.length != 9) {
+        } else if (!Number.isFinite(Number(values.numtelefono)) || values.numtelefono.length != 9) {
             validationErrors.numtelefono = "Número de telefóno no número no valido"
         }
 
@@ -84,8 +110,7 @@ export default function RegistrarPsicologo() {
         }
 
         if (Object.keys(validationErrors).length == 0) {
- 
-            axios.put(`/api/docente/`, values)
+            GuardarRegistor(e)
         }
         setErrors(validationErrors)
 
@@ -148,7 +173,7 @@ export default function RegistrarPsicologo() {
                                     autoComplete="address-level2"
                                     className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                 />
-                                 {errors.numtelefono && <p className="text-red-400 text-left text-[13px]">{errors.numtelefono}</p>}
+                                {errors.numtelefono && <p className="text-red-400 text-left text-[13px]">{errors.numtelefono}</p>}
                             </div>
                         </div>
 
@@ -165,7 +190,7 @@ export default function RegistrarPsicologo() {
                                     autoComplete="address-level1"
                                     className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                 />
-                                 {errors.edad && <p className="text-red-400 text-left text-[13px]">{errors.edad}</p>}
+                                {errors.edad && <p className="text-red-400 text-left text-[13px]">{errors.edad}</p>}
                             </div>
                         </div>
 
@@ -193,13 +218,13 @@ export default function RegistrarPsicologo() {
                             <div className="mt-2">
                                 <input
                                     type="email"
-                                    name="correo"
-                                    id="correo"
+                                    name="email"
+                                    id="email"
                                     autoComplete="email"
                                     onChange={handleChange}
                                     className="font-sans block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                 />
-                                {errors.correo && <p className="text-red-400 text-left text-[13px]">{errors.correo}</p>}
+                                {errors.email && <p className="text-red-400 text-left text-[13px]">{errors.email}</p>}
                             </div>
                         </div>
 
@@ -266,8 +291,8 @@ export default function RegistrarPsicologo() {
 
                     </div>
                 </div>
-
             </div>
+            <ToastContainer />
 
         </form>
     )

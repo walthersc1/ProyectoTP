@@ -9,7 +9,7 @@ export async function GET(request) {
     console.log(idCodigo);
 
     const { rows: usuarios } =
-      await sql`select * from estudiantes ;  `;
+      await sql`select * from estudiantes `;
 
     return NextResponse.json({ usuarios }, { status: 200 });
   } catch (error) {
@@ -58,7 +58,7 @@ export async function POST(req, { params }) {
         estado = ${datos.estado}
     WHERE
       idestudiante = ${datos.idestudiante};`
-
+console.log("Sale de la query")
     return NextResponse.json("Se actualizo correctamnete - 200");
   } catch (error) {
     return NextResponse.error('Error: ' + error.message, 500);

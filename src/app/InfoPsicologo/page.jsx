@@ -4,6 +4,8 @@ import React from 'react'
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function InfoPsicologo() {
     const consultaUsuario = async (e) => {
@@ -12,6 +14,7 @@ export default function InfoPsicologo() {
         const usuario = await axios.get(`/api/docente/${correo}`)
         return usuario.data.psicologo[0];
     };
+
     const { isOpen: isOpenEliminar, onClose: cerrarEliminar, onOpen: onOpenEliminar, onOpenChange: onOpenChangeEliminar } = useDisclosure();
     const [valoresInput, setValoresInput] = useState({
         iddocente: "",
@@ -63,6 +66,7 @@ export default function InfoPsicologo() {
     const actualizarDatos = async (e) => {
         e.preventDefault();
         axios.post(`/api/docente/${valoresInput.correo}`, valoresInput);
+        toast.success("Se actualizo los datos de manera correcta")
     };
     const darDebajaCuenta = async (event) => {
         axios.post(`/api/docente/${valoresInput.correo}`, valoresInput);
@@ -297,7 +301,7 @@ export default function InfoPsicologo() {
 
                     </div>
 
-
+                    <ToastContainer />
 
                 </div>
 
