@@ -22,7 +22,7 @@ export default function Agenda() {
       const usuario = await axios.get(`/api/queries/${correo}`)
       setdatos({
         ...datos,
-        codigo:usuario.data.usuarios[0].codestudiante,
+        codigo:usuario.data.codestudiante,
       })
   };
   obtenerDatosUsuario()

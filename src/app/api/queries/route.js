@@ -20,6 +20,7 @@ export async function GET(request) {
 
 export async function PUT(request) {
   try {
+    console.log("Guardando")
     const datos = await request.json();
 
     const hashedPassword = await bcrypt.hash(datos.password, parseInt(process.env.saltRounds));
@@ -45,6 +46,7 @@ export async function PUT(request) {
 export async function POST(req, { params }) {
   try {
     const datos = await req.json();
+    console.log("Entrando al post")
     console.log(datos);
     await sql`UPDATE estudiantes
     SET 

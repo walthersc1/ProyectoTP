@@ -15,6 +15,7 @@ export default function TextProcessor() {
   const [data, setdata] = useState({
     gradodepresion: "",
     idestudiante: "",
+    user:"",
     respuesta1: "",
     respuesta2: "",
     respuesta3: "",
@@ -60,7 +61,7 @@ export default function TextProcessor() {
   const actualizarDatos = async (e) => {
     e.preventDefault();
     //console.log("Se envio la respuesta")
-    const userMessage = { text: input, sender: 'user' };
+    const userMessage = { text: input, sender: data.user };
 
     setMessages([...messages, userMessage]);
     setInput('');
@@ -159,7 +160,8 @@ export default function TextProcessor() {
         const usuario = await axios.get(`/api/queries/${correo}`)
         setdata((prevData) => ({
           ...prevData,
-          idestudiante: (usuario.data.usuarios[0].idestudiante),
+          idestudiante: (usuario.data.idestudiante),
+          user:(usuario.data.nombre)
         }));
       } catch (error) {
         console.error('Error al obtener la información del usuario:', error);
@@ -181,8 +183,8 @@ export default function TextProcessor() {
           <div className='overflow-y-scroll flex flex-col h-[500px]' ref={messageEndRef}>
             {messages.map((message, index) => (
 
-              <div key={index} className={`my-2 p-2 rounded-lg max-w-xs ${message.sender === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-gray-300 text-black self-start'}`}>
-                <div className={`  ${message.sender === 'user' ? 'text-right fond-bold' : 'text-left font-bold'}`}>
+              <div key={index} className={`my-2 p-2 rounded-lg max-w-xs ${message.sender === data.user ? 'bg-violet-500 text-white self-end' : 'bg-gray-200 text-black self-start'}`}>
+                <div className={`  ${message.sender === data.user ? 'text-black font-bold' : 'text-left font-bold'}`}>
                   {message.sender}
                 </div>
                 {message.text}

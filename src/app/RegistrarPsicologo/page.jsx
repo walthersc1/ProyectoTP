@@ -6,10 +6,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function RegistrarPsicologo() {
     const año = new Date().getFullYear();
-    /*const actualizarDatos = async (e) => {
-        e.preventDefault();
-        axios.PUT(`/api/docente/${1}`, values);
-    };*/
 
     const [values, setValues] = useState({
         nombre: "",
@@ -45,7 +41,7 @@ export default function RegistrarPsicologo() {
     const GuardarRegistor = async (e) => {
         e.preventDefault()
         try {
-            const resultado = await axios.put(`/api/docente/`, values)
+            const resultado = await axios.post(`/api/docente/`, values)
             console.log(resultado.status)
             if (resultado.status == 200) {
                 inicioSesion()

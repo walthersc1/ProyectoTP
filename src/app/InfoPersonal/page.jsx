@@ -8,14 +8,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function InfoPersonal() {
-    const consultaUsuario = async (e) => {
-        const data = await axios.get('/api/getToken')
-        const correo = data.data.email
-        //console.log(correo)
-        const usuario = await axios.get(`/api/queries/${correo}`)
-        //console.log(usuario.data)
-        return usuario.data;
-    };
+
     const [carreras, setCarreras] = useState([]);
     const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
     const [errors, setErrors] = useState({})
@@ -40,25 +33,32 @@ export default function InfoPersonal() {
     const año = new Date().getFullYear();
 
     useEffect(() => {
-        consultaUsuario().then((res) => {
+
+        const consultaUsuario = async (e) => {
+            const data = await axios.get('/api/getToken')
+            const correo = data.data.email
+            //console.log(correo)
+            const usuario = await axios.get(`/api/queries/${correo}`)
+            //console.log(usuario.data)
 
             setValoresInput({
-                idestudiante: res.usuarios[0].idestudiante,
-                nombre: res.usuarios[0].nombre,
-                apellido: res.usuarios[0].apellido,
-                numtelefono: String(res.usuarios[0].numtelefono),
-                edad: String(res.usuarios[0].edad),
-                correo: res.usuarios[0].correo,
-                codestudiante: res.usuarios[0].codestudiante,
-                codcarrera: String(res.usuarios[0].codcarrera),
-                fechanacimiento: res.usuarios[0].fechanacimiento.slice(0, 10),
-                fechacreacion: res.usuarios[0].fechacreacion,
-                estado: res.usuarios[0].estado,
+                idestudiante: usuario.data.idestudiante,
+                nombre: usuario.data.nombre,
+                apellido: usuario.data.apellido,
+                numtelefono: String(usuario.data.numtelefono),
+                edad: String(usuario.data.edad),
+                correo: usuario.data.correo,
+                codestudiante: usuario.data.codestudiante,
+                codcarrera: String(usuario.data.codcarrera),
+                fechanacimiento: usuario.data.fechanacimiento.slice(0, 10),
+                fechacreacion: usuario.data.fechacreacion,
+                estado: usuario.data.estado,
                 ConstActual: "",
                 ConstNueva: "",
                 ConstConfirm: "",
             });
-        });
+
+        };
 
         const fetchCarreras = async () => {
             try {
@@ -68,7 +68,8 @@ export default function InfoPersonal() {
                 console.error('Error al obtener las carreras:', error);
             }
         };
-
+        
+        consultaUsuario();
         fetchCarreras();
 
     }, []);
@@ -105,7 +106,7 @@ export default function InfoPersonal() {
 
     const actualizarDatos = async (event) => {
         if (handleSubmit()) {
-            event.preventDefault()
+                event.preventDefault()
             await axios.post(`/api/queries/`, values);
             toast.success("Se guardaron los cambios")
         }
@@ -177,6 +178,10 @@ export default function InfoPersonal() {
 
     }
     const modificarContraseña = async () => {
+        if(!values.ConstActual.trim()){
+            toast.error("Por favor su contraseña actual")
+            return
+        }
         if (!values.ConstNueva.trim()) {
             toast.error("Por favor ingresar una contraseña nueva")
         } else {
@@ -391,7 +396,7 @@ export default function InfoPersonal() {
                         <ModalContent>
                             {(onClose) => (
                                 <>
-                                    <ModalHeader className="flex flex-col gap-1">Información del psicologo</ModalHeader>
+                                    <ModalHeader className="flex flex-col gap-1">Modificación de contraseña para Paciente</ModalHeader>
                                     <ModalBody>
                                         <div className="sm:col-span-4">
                                             <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">

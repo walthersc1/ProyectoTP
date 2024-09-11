@@ -15,8 +15,12 @@ export default function InfoPsicologo() {
         return usuario.data.psicologo[0];
     };
 
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    const [errors, setErrors] = useState({})
+    const año = new Date().getFullYear();
+    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
     const { isOpen: isOpenEliminar, onClose: cerrarEliminar, onOpen: onOpenEliminar, onOpenChange: onOpenChangeEliminar } = useDisclosure();
-    const [valoresInput, setValoresInput] = useState({
+    const [values, setValores] = useState({
         iddocente: "",
         nombre: "",
         apellido: "",
@@ -30,12 +34,15 @@ export default function InfoPsicologo() {
         horainicio: "",
         horafin: "",
         estado: "",
+        ConstActual:"",
+        ConstNueva:"",
+        ConstConfirm:"",
     });
 
     useEffect(() => {
         consultaUsuario().then((res) => {
 
-            setValoresInput({
+            setValores({
                 iddocente: res.iddocente,
                 nombre: res.nombre,
                 apellido: res.apellido,
@@ -48,15 +55,18 @@ export default function InfoPsicologo() {
                 disponibilidad: res.disponibilidad,
                 horainicio: res.horainicio,
                 horafin: res.horafin,
-                estado: "true"
+                estado: "true",
+                ConstActual:"",
+                ConstNueva:"",
+                ConstConfirm:"",
             });
         });
     }, []);
 
     const handleChange = async (event) => {
         const { name, value } = event.target;
-        setValoresInput({
-            ...valoresInput,
+        setValores({
+            ...values,
             [name]: value,
         });
     };
@@ -65,30 +75,117 @@ export default function InfoPsicologo() {
 
     const actualizarDatos = async (e) => {
         e.preventDefault();
-        axios.post(`/api/docente/${valoresInput.correo}`, valoresInput);
-        toast.success("Se actualizo los datos de manera correcta")
+        if (handleSubmit) {
+            axios.post(`/api/docente/${values.correo}`, values);
+            toast.success("Se actualizo los datos de manera correcta")
+        }
     };
     const darDebajaCuenta = async (event) => {
-        axios.post(`/api/docente/${valoresInput.correo}`, valoresInput);
+        axios.post(`/api/docente/${values.correo}`, values);
         await axios.post("/api/getToken/logout")
         window.location.reload();
     }
 
     const CerarModalDarDeBaja = (e) => {
-        setValoresInput({
-            ...valoresInput,
+        setValores({
+            ...values,
             estado: 'true',
         });
         cerrarEliminar()
     }
+    const modificarContraseña = async () => {
+        if (!values.ConstActual.trim()){
+            toast.error("Por favor ingresar su contraseña actual")
+            return
+        }
+        if (!values.ConstNueva.trim()) {
+            toast.error("Por favor ingresar una contraseña nueva")
+        } else {
+            try {
+                if (values.ConstNueva == values.ConstConfirm) {
+                    const respuesta = await axios.put('/api/docente/', values);
+                    if (respuesta.status) {
+                        toast.success(respuesta.data.message)
+                        onClose()
+                    }
+                } else {
+                    toast.error("No coninciden las contraseñas")
+                }
+            } catch (error) {
+                console.error(error.response.data.message)
+                if (error.response.status == 404) {
+                    toast.error(error.response.data.message)
+                }
+            }
+        }
+    }
 
     const abrirModalDarDeBajaCuenta = (e) => {
         e.preventDefault()
-        setValoresInput({
-            ...valoresInput,
+        setValores({
+            ...values,
             estado: 'false',
         });
         onOpenEliminar(e)
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        const validationErrors = {}
+        console.log(values)
+
+        if (!values.nombre.trim()) {
+            validationErrors.nombre = "Introdusca su apellido"
+        }
+
+        if (!values.apellido.trim()) {
+            validationErrors.apellido = "Introdusca su apellido"
+        }
+
+        if (!values.coddocente.trim()) {
+            validationErrors.coddocente = "Introdusca su apellido"
+        }
+
+        if (!values.edad.trim()) {
+            validationErrors.edad = "Introdusca su edad"
+        }
+
+        if (!values.correo.trim()) {
+            validationErrors.correo = "Introducsca su correo"
+        } else if (!regex.test(values.correo)) {
+            validationErrors.correo = "Correo no valido"
+        }
+
+        if (!values.numtelefonico.trim()) {
+            validationErrors.numtelefonico = "Se requiere ingresar un número de telefono"
+        } else if (!Number.isFinite(Number(values.numtelefonico)) || values.numtelefonico.length != 9) {
+            validationErrors.numtelefonico = "Número de telefóno no número no valido"
+        }
+
+        if (!values.fechanacimiento.trim()) {
+            validationErrors.fechanacimiento = "Debe de ingresar su fecha de nacimiento"
+        } else {
+            const edadPorFecha = año - parseInt(values.fechanacimiento.slice(0, 4))
+            if (values.edad != edadPorFecha) {
+                validationErrors.fechanacimiento = "La fecha no coincide con su edad "
+            }
+        }
+        if (!values.horainicio.trim()) {
+            validationErrors.horainicio = "Por favor ingresa una hora de inicio"
+        }
+        if (!values.horafin.trim()) {
+            validationErrors.horafin = "Por favor ingrese una hora de fin"
+        }
+
+        if (values.horainicio > values.horafin) {
+            validationErrors.horafin = "La hora de fin debe se mayor a la hora de inicio"
+        }
+        if (Object.keys(validationErrors).length == 0) {
+            return true
+        } else {
+            return false
+        }
+        setErrors(validationErrors)
     }
 
     return (
@@ -112,8 +209,8 @@ export default function InfoPsicologo() {
                                     autoComplete="given-name"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.nombre}
-                                />
+                                    value={values.nombre}
+                                />{errors.nombre && <p className="text-red-400 text-left text-[13px]">{errors.nombre}</p>}
                             </div>
                         </div>
 
@@ -129,8 +226,8 @@ export default function InfoPsicologo() {
                                     autoComplete="family-name"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.apellido}
-                                />
+                                    value={values.apellido}
+                                />{errors.apellido && <p className="text-red-400 text-left text-[13px]">{errors.apellido}</p>}
                             </div>
                         </div>
 
@@ -147,8 +244,8 @@ export default function InfoPsicologo() {
                                     autoComplete="address-level2"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.numtelefonico}
-                                />
+                                    value={values.numtelefonico}
+                                />{errors.numtelefonico && <p className="text-red-400 text-left text-[13px]">{errors.numtelefonico}</p>}
                             </div>
                         </div>
 
@@ -164,8 +261,8 @@ export default function InfoPsicologo() {
                                     autoComplete="address-level1"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.edad}
-                                />
+                                    value={values.edad}
+                                />{errors.edad && <p className="text-red-400 text-left text-[13px]">{errors.edad}</p>}
                             </div>
                         </div>
 
@@ -181,8 +278,8 @@ export default function InfoPsicologo() {
                                     autoComplete="birth-date"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.fechanacimiento}
-                                />
+                                    value={values.fechanacimiento}
+                                />{errors.fechanacimiento && <p className="text-red-400 text-left text-[13px]">{errors.fechanacimiento}</p>}
                             </div>
                         </div>
 
@@ -198,8 +295,8 @@ export default function InfoPsicologo() {
                                     autoComplete="email"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.coddocente}
-                                />
+                                    value={values.coddocente}
+                                />{errors.coddocente && <p className="text-red-400 text-left text-[13px]">{errors.coddocente}</p>}
                             </div>
                         </div>
 
@@ -215,8 +312,8 @@ export default function InfoPsicologo() {
                                     autoComplete="email"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}
-                                    value={valoresInput.correo}
-                                />
+                                    value={values.correo}
+                                />{errors.correo && <p className="text-red-400 text-left text-[13px]">{errors.correo}</p>}
                             </div>
                         </div>
 
@@ -231,9 +328,9 @@ export default function InfoPsicologo() {
                                     type="time"
                                     name="horainicio"
                                     onChange={handleChange}
-                                    value={valoresInput.horainicio}
+                                    value={values.horainicio}
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                                />
+                                />{errors.horainicio && <p className="text-red-400 text-left text-[13px]">{errors.horainicio}</p>}
                             </div>
                         </div>
                         <div className="sm:col-span-2">
@@ -246,26 +343,9 @@ export default function InfoPsicologo() {
                                     type="time"
                                     name="horafin"
                                     onChange={handleChange}
-                                    value={valoresInput.horafin}
+                                    value={values.horafin}
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                                />
-                            </div>
-                        </div>
-
-
-                        <div className="sm:col-span-4">
-                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                                Password
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="password"
-                                    placeholder="**********"
-                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                                />
+                                />{errors.horafin && <p className="text-red-400 text-left text-[13px]">{errors.horafin}</p>}
                             </div>
                         </div>
 
@@ -291,6 +371,13 @@ export default function InfoPsicologo() {
 
                         <div className="sm:col-span-6">
                             <div className="border-t-4 mx-3 p-2 border-gray-300"></div>
+
+                            <h2 className="font-medium pb-3">Modificar Contraseña</h2>
+                            <div className="mt-2 font-bold">
+                                <button onClick={onOpen} className="font-sans text-white bg-violet-500 w-full rounded-full border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:max-w-xs sm:text-sm sm:leading-6 p-3">
+                                    Modificar
+                                </button>
+                            </div>
                             <h2 className="font-medium pb-3">Eliminar cuenta de psicologo</h2>
                             <div className="mt-2 font-bold">
                                 <button onClick={abrirModalDarDeBajaCuenta} className="font-sans text-white bg-red-500 w-full rounded-lg border-0 py-1.5 shadow-sm ring-1 ring-inset ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:max-w-xs sm:text-sm sm:leading-6 p-3">
@@ -305,6 +392,76 @@ export default function InfoPsicologo() {
 
                 </div>
 
+                <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='3xl' scrollBehavior='inside'>
+                        <ModalContent>
+                            {(onClose) => (
+                                <>
+                                    <ModalHeader className="flex flex-col gap-1">Modificación de contraseña para Psicologo</ModalHeader>
+                                    <ModalBody>
+                                        <div className="sm:col-span-4">
+                                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                                Contreseña Actual
+                                            </label>
+                                            <div className="mt-2">
+                                                <input
+                                                    id="contraseña"
+                                                    name="ConstActual"
+                                                    type="password"
+                                                    autoComplete="password"
+                                                    placeholder="**********"
+                                                    onChange={handleChange}
+                                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="sm:col-span-4">
+                                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                                Nueva Contraseña
+                                            </label>
+                                            <div className="mt-2">
+                                                <input
+                                                    id="contraseña"
+                                                    name="ConstNueva"
+                                                    type="password"
+                                                    autoComplete="password"
+                                                    placeholder="**********"
+                                                    onChange={handleChange}
+                                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="sm:col-span-4">
+                                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                                Confirmar contraseña
+                                            </label>
+                                            <div className="mt-2">
+                                                <input
+                                                    id="contraseña"
+                                                    name="ConstConfirm"
+                                                    type="password"
+                                                    autoComplete="password"
+                                                    placeholder="**********"
+                                                    onChange={handleChange}
+                                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                                />
+                                            </div>
+                                        </div>
+                                    </ModalBody>
+                                    <ModalFooter>
+                                        <Button color="danger" variant="light" onPress={onClose}>
+                                            Cancelar
+                                        </Button>
+                                        <Button color="primary" onPress={modificarContraseña}>
+                                            Modificar Contraseña
+                                        </Button>
+                                    </ModalFooter>
+                                </>
+                            )}
+                        </ModalContent>
+
+                    </Modal>
 
                 <Modal isOpen={isOpenEliminar} onOpenChange={onOpenChangeEliminar} size='3xl' scrollBehavior='inside'>
                     <ModalContent>
