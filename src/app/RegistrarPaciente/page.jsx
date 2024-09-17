@@ -69,7 +69,7 @@ export default function RegistrarPaciente() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = {};
-console.log(values)
+        console.log(values)
         // personalisar mas los mensaje de error para nombre y apellido, la segunda condicion del if
         if (!values.nombre.trim() || !values.nombre.includes(" ")) {
             validationErrors.nombre = "Introdusca sus nombres"
@@ -135,7 +135,7 @@ console.log(values)
 
                 console.log("Entrando a la consulta")
                 const result = await axios.put(`/api/queries`, values)
-                toast.success("Se actualizo los datos de manera correcta")
+                toast.success("Se creo el usuario de manera correcta")
             }
         } catch (error) {
             console.log(error.response)
@@ -335,7 +335,7 @@ console.log(values)
                 </div>
 
             </div>
-                        <ToastContainer />
+            <ToastContainer />
 
         </form>
     )

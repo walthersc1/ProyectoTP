@@ -9,7 +9,9 @@ export async function POST(req, { params }) {
     console.log(datos)
     const hashedPassword = await bcrypt.hash(datos.password, parseInt(process.env.saltRounds));
     var checkEmailQuery = 0;
-    checkEmailQuery = await sql`SELECT COUNT(*) FROM docentes WHERE correo = ${datos.email}`
+    checkEmailQuery = await sql`select count(*) from estudiantes e, docentes d
+    where e.correo = ${datos.correo}
+    or d.correo = ${datos.correo}`
 
     //  const compracion = await bcrypt.compare(datos.password,hashedPassword)
 

@@ -26,7 +26,9 @@ export async function PUT(request) {
     const hashedPassword = await bcrypt.hash(datos.password, parseInt(process.env.saltRounds));
     var checkEmailQuery = 0;
 
-    checkEmailQuery = await sql`SELECT COUNT(*) FROM estudiantes WHERE correo = ${datos.correo}`
+    checkEmailQuery = await sql`select count(*) from estudiantes e, docentes d
+                                where e.correo = ${datos.correo}
+                                or d.correo = ${datos.correo}`
 
     if (checkEmailQuery.rows[0].count > 0) {
       return NextResponse.json({ message: "ya existe un usuario registrado con este correo" }, { status: 500 });        
