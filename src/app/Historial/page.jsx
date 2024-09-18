@@ -25,6 +25,18 @@ export default function Historial() {
 
   }, []);
 
+  const [botResponses, setBotResponses] = useState([
+    'Describa en detalle cómo ha experimentado la falta de interés o placer en actividades que antes disfrutaba. ¿En qué tipo de actividades ha notado este cambio y qué tan intenso ha sido este desinterés?',
+    'Exprese con sus palabras cómo ha percibido su estado de ánimo. ¿Siente que ha experimentado desánimo, falta de esperanza o se ha sentido decaído/triste? ¿En qué momentos o situaciones ha notado estas emociones con mayor intensidad?',
+    'Describa detalladamente sus patrones de sueño. ¿Ha tenido problemas para conciliar el sueño o se despierta con frecuencia durante la noche? ¿Sus horas de sueño han aumentado o disminuido últimamente? ¿Cómo han impactado estos cambios en su estado de ánimo?',
+    'Exprese con sus palabras cómo ha experimentado los niveles de energía. ¿Ha sentido cansancio o falta de energía constantemente? ¿En qué actividades o momentos del día ha notado esta sensación con mayor intensidad? ¿Cómo ha afectado esto a su vida cotidiana?',
+    'Describa detalladamente cómo han sido sus hábitos alimenticios. ¿Ha perdido el apetito o ha sentido una necesidad excesiva de comer? ¿Ha notado cambios en sus hábitos alimenticios? ¿Cómo han impactado estos cambios en su estado de ánimo y salud física?',
+    'Exprese con sus palabras cómo se ha sentido consigo mismo(a). ¿Ha experimentado sentimientos de culpa, vergüenza, baja autoestima o inutilidad? ¿En qué situaciones o pensamientos ha notado estos sentimientos con mayor intensidad? ¿Cómo ha afectado esto a su imagen personal y a sus relaciones?',
+    'Describa detalladamente cómo ha sido su capacidad de concentración. ¿Le ha costado enfocarse en tareas que antes le resultaban fáciles? ¿Ha notado dificultad para prestar atención o recordar información? ¿Durante qué momentos o actividades ha percibido esta dificultad con mayor intensidad? ¿Qué impacto tuvo en su rendimiento académico?',
+    'Exprese con sus palabras cómo ha sido su comportamiento motor. ¿Ha notado cambios en su ritmo de movimiento o en su forma de hablar? ¿Las personas a su alrededor han comentado algo sobre estos cambios? ¿Cómo han afectado estos cambios a sus actividades diarias y académicas?',
+    'Describa detalladamente si ha tenido pensamientos relacionados con la muerte o autolesiones. ¿Con qué frecuencia e intensidad ha tenido estos pensamientos? ¿Ha considerado llevar a cabo alguno de estos pensamientos? ¿Qué emociones o situaciones los han desencadenado?'
+  ]);
+
 
   const fetchModalData = async () => {
     try {
@@ -120,6 +132,7 @@ export default function Historial() {
                     {modalData.respuestas.map((respuesta, index) => (
                       <div key={index} className='flex flex-col px-3 gap-2'>
                         <h2>Pregunta {index + 1}</h2>
+                        <p>{botResponses[index]}</p>
                         <p className='bg-slate-300 p-3 text-justify'>{respuesta}</p>
                       </div>
                     ))}
