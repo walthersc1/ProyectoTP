@@ -29,7 +29,7 @@ export default function TextProcessor() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [botResponses, setBotResponses] = useState([
-    'Mucho gusto soy Mapri, te voy a hacer unas preguntas, tus respuestas solo serán leídas en caso el personal lo necesite. Mientras mas detallada sea tu respuesta más precisa será el análisis. Escribe si para continuar.',
+    'Hola, soy Mapri. Te haré unas preguntas para evaluar cómo te sientes. Tus respuestas son confidenciales y solo serán revisadas si es necesario. Cuanta más información des, más preciso será el análisis. Escribe algo para comenzar.',
     'Describa en detalle cómo ha experimentado la falta de interés o placer en actividades que antes disfrutaba. ¿En qué tipo de actividades ha notado este cambio y qué tan intenso ha sido este desinterés?',
     'Exprese con sus palabras cómo ha percibido su estado de ánimo. ¿Siente que ha experimentado desánimo, falta de esperanza o se ha sentido decaído/triste? ¿En qué momentos o situaciones ha notado estas emociones con mayor intensidad?',
     'Describa detalladamente sus patrones de sueño. ¿Ha tenido problemas para conciliar el sueño o se despierta con frecuencia durante la noche? ¿Sus horas de sueño han aumentado o disminuido últimamente? ¿Cómo han impactado estos cambios en su estado de ánimo?',
