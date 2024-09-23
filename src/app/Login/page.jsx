@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import Image from "next/image";
 import axios from "axios"
-import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -25,7 +24,7 @@ export default function Login() {
             theme: "colored",
         });
     }
-    const route = useRouter();
+    //const route = useRouter();
 
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
