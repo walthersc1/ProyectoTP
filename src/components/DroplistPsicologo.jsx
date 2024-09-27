@@ -91,9 +91,6 @@ export default function DroplistPsicologo() {
                     </DropdownSection>
 
                     <DropdownSection aria-label="Help & Feedback">
-                        <DropdownItem key="help_and_feedback" endContent={Images.feedback}>
-                            Help & Feedback
-                        </DropdownItem>
                         <DropdownItem key="logout" endContent={Images.logout} onPress={logout}>
                             Log Out</DropdownItem>
                     </DropdownSection>

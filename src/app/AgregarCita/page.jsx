@@ -81,7 +81,7 @@ export default function AgendarCita() {
     if (!datosCita.horafin.trim()) {
       validationErrors.horafin = "Ingresar la hora de fin de la cita";
     }
-    if(datosCita.horainicio > datosCita.horafin){
+    if (datosCita.horainicio > datosCita.horafin) {
       return false
     }
     setErrors(validationErrors);

@@ -61,11 +61,16 @@ export default function TextProcessor() {
   const actualizarDatos = async (e) => {
     e.preventDefault();
     //console.log("Se envio la respuesta")
+    if (input.length < 20) {
+      toast.error("El mensaje es muy corto, por favor detalles mas su respuesta.");
+      return; 
+    }
+  
     const userMessage = { text: input, sender: data.user };
 
     setMessages([...messages, userMessage]);
     setInput('');
-
+  
     const response = await axios.get('https://tpalgoritmo-production.up.railway.app/predict/', {
       params: {
         text: userMessage.text
