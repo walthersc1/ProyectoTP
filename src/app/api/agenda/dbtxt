@@ -1,0 +1,53 @@
+create table cita
+- codcita integer
+- lugar varchar
+- modalidad varchar
+- horainicio time 
+- horafin time
+- fecha date
+- codestudiante integer
+- coddocente integer
+
+create table resultado
+- codresultado integer
+- gradodepresion varchar
+- idestudiante integer
+- respuesta1
+- respuesta2 
+- respuesta3 
+- respuesta4 
+- respuesta5 
+- respuesta6 
+- respuesta7 
+- respuesta8 
+- respuesta9 varchar o text
+- fechacreacion current_date
+
+create table docentes
+- iddocente
+- nombre
+- apellido
+- numtelefono
+- edad
+- correo
+- horainicio
+- horafin
+- coddocente
+- fechanacimiento
+- password
+
+
+create table estudiantes
+- idestudiante
+- nombre
+- apellido
+- numtelefono
+- edad
+- correo
+- codcarrera
+- fechanacimiento
+- estado
+
+create table carrera
+- idcarrera
+- carrera
