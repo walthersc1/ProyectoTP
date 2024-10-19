@@ -1,17 +1,32 @@
 "use client"
-import React from "react";
+import React,{useEffect,useState} from "react";
 import {DropdownItem, DropdownTrigger, Dropdown, DropdownMenu, DropdownSection, User, Button,Link} from "@nextui-org/react";
 import { Images } from '@/components/imagenes'
 import axios from "axios";
 
 export default function DroplistPaciente () {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-
+    const [datosEstudiante, setdatosEstudiante] = useState([]);
     const logout = async () => {
         await axios.post("/api/getToken/logout")
         window.location.reload();
     }
+    useEffect(() => {
+        const inicialisarDatos = async () => {
+            const datosCookie = await axios.get('/api/getToken');
+            const correo = datosCookie.data.email;
+            const datoPaciente = await axios.get(`/api/queries/${correo}`);
+            const codEstudiante = datoPaciente.data.codestudiante;
+            const estudiante = datoPaciente.data.apellido.split(" ")[0] + " " + datoPaciente.data.nombre.split(" ")[0]
+            console.log("Estudiante: " + codEstudiante + " codEstudiante: " + codEstudiante)
+            setdatosEstudiante({
+                codEstudiante: codEstudiante,
+                nomEstudiante: estudiante
+            })
+        };
+        inicialisarDatos();
 
+    }, []);
 
   return (
     <>
@@ -46,8 +61,8 @@ export default function DroplistPaciente () {
             <DropdownItem isReadOnly key="profile"
                 className="h-14 gap-2">
                 <User
-                name="Junior Garcia"
-                description="@jrgarciadev"
+                name={datosEstudiante.nomEstudiante}
+                description={datosEstudiante.codEstudiante}
                 classNames={{
                     name: "text-default-600",
                     description: "text-default-500",

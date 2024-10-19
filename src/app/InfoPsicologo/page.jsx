@@ -34,9 +34,9 @@ export default function InfoPsicologo() {
         horainicio: "",
         horafin: "",
         estado: "",
-        ConstActual:"",
-        ConstNueva:"",
-        ConstConfirm:"",
+        ConstActual: "",
+        ConstNueva: "",
+        ConstConfirm: "",
     });
 
     useEffect(() => {
@@ -56,9 +56,9 @@ export default function InfoPsicologo() {
                 horainicio: res.horainicio,
                 horafin: res.horafin,
                 estado: "true",
-                ConstActual:"",
-                ConstNueva:"",
-                ConstConfirm:"",
+                ConstActual: "",
+                ConstNueva: "",
+                ConstConfirm: "",
             });
         });
     }, []);
@@ -75,9 +75,11 @@ export default function InfoPsicologo() {
 
     const actualizarDatos = async (e) => {
         e.preventDefault();
-        if (handleSubmit) {
+        if (await handleSubmit()) {
             axios.post(`/api/docente/${values.correo}`, values);
             toast.success("Se actualizo los datos de manera correcta")
+        } else {
+            toast.error("Por favor ingrese bien los datos")
         }
     };
     const darDebajaCuenta = async (event) => {
@@ -94,13 +96,18 @@ export default function InfoPsicologo() {
         cerrarEliminar()
     }
     const modificarContraseña = async () => {
-        if (!values.ConstActual.trim()){
+        if (!values.ConstActual.trim()) {
             toast.error("Por favor ingresar su contraseña actual")
             return
         }
         if (!values.ConstNueva.trim()) {
             toast.error("Por favor ingresar una contraseña nueva")
-        } else {
+            return
+        }if((String)(values.ConstNueva).length < 6 && (String)(values.ConstConfirm).length < 6){
+            toast.error("La contraseña tiene que tener una longitud minima de 6")
+            return
+        } 
+        else {
             try {
                 if (values.ConstNueva == values.ConstConfirm) {
                     const respuesta = await axios.put('/api/docente/', values);
@@ -130,23 +137,27 @@ export default function InfoPsicologo() {
     }
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
         const validationErrors = {}
-        console.log(values)
+        const validacionNum = /\d/
 
         if (!values.nombre.trim()) {
             validationErrors.nombre = "Introdusca su apellido"
         }
-
+        if (validacionNum.test(values.nombre)) {
+            validationErrors.nombre = "El nombre no puede contener números"
+        }
         if (!values.apellido.trim()) {
             validationErrors.apellido = "Introdusca su apellido"
+        }
+        if (validacionNum.test(values.apellido)) {
+            validationErrors.apellido = "El apellido no puede contener números"
         }
 
         if (!values.coddocente.trim()) {
             validationErrors.coddocente = "Introdusca su apellido"
         }
 
-        if (!values.edad.trim()) {
+        if (!(String)(values.edad).trim()) {
             validationErrors.edad = "Introdusca su edad"
         }
 
@@ -180,12 +191,13 @@ export default function InfoPsicologo() {
         if (values.horainicio > values.horafin) {
             validationErrors.horafin = "La hora de fin debe se mayor a la hora de inicio"
         }
+        setErrors(validationErrors)
         if (Object.keys(validationErrors).length == 0) {
+            setErrors(validationErrors)
             return true
         } else {
             return false
         }
-        setErrors(validationErrors)
     }
 
     return (
@@ -393,75 +405,75 @@ export default function InfoPsicologo() {
                 </div>
 
                 <Modal isOpen={isOpen} onOpenChange={onOpenChange} size='3xl' scrollBehavior='inside'>
-                        <ModalContent>
-                            {(onClose) => (
-                                <>
-                                    <ModalHeader className="flex flex-col gap-1">Modificación de contraseña para Psicologo</ModalHeader>
-                                    <ModalBody>
-                                        <div className="sm:col-span-4">
-                                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                                                Contreseña Actual
-                                            </label>
-                                            <div className="mt-2">
-                                                <input
-                                                    id="contraseña"
-                                                    name="ConstActual"
-                                                    type="password"
-                                                    autoComplete="password"
-                                                    placeholder="**********"
-                                                    onChange={handleChange}
-                                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                                                />
-                                            </div>
+                    <ModalContent>
+                        {(onClose) => (
+                            <>
+                                <ModalHeader className="flex flex-col gap-1">Modificación de contraseña para Psicologo</ModalHeader>
+                                <ModalBody>
+                                    <div className="sm:col-span-4">
+                                        <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                            Contreseña Actual
+                                        </label>
+                                        <div className="mt-2">
+                                            <input
+                                                id="contraseña"
+                                                name="ConstActual"
+                                                type="password"
+                                                autoComplete="password"
+                                                placeholder="**********"
+                                                onChange={handleChange}
+                                                className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                            />
                                         </div>
+                                    </div>
 
-                                        <div className="sm:col-span-4">
-                                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                                                Nueva Contraseña
-                                            </label>
-                                            <div className="mt-2">
-                                                <input
-                                                    id="contraseña"
-                                                    name="ConstNueva"
-                                                    type="password"
-                                                    autoComplete="password"
-                                                    placeholder="**********"
-                                                    onChange={handleChange}
-                                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                                                />
-                                            </div>
+                                    <div className="sm:col-span-4">
+                                        <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                            Nueva Contraseña
+                                        </label>
+                                        <div className="mt-2">
+                                            <input
+                                                id="contraseña"
+                                                name="ConstNueva"
+                                                type="password"
+                                                autoComplete="password"
+                                                placeholder="**********"
+                                                onChange={handleChange}
+                                                className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                            />
                                         </div>
+                                    </div>
 
-                                        <div className="sm:col-span-4">
-                                            <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                                                Confirmar contraseña
-                                            </label>
-                                            <div className="mt-2">
-                                                <input
-                                                    id="contraseña"
-                                                    name="ConstConfirm"
-                                                    type="password"
-                                                    autoComplete="password"
-                                                    placeholder="**********"
-                                                    onChange={handleChange}
-                                                    className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
-                                                />
-                                            </div>
+                                    <div className="sm:col-span-4">
+                                        <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                            Confirmar contraseña
+                                        </label>
+                                        <div className="mt-2">
+                                            <input
+                                                id="contraseña"
+                                                name="ConstConfirm"
+                                                type="password"
+                                                autoComplete="password"
+                                                placeholder="**********"
+                                                onChange={handleChange}
+                                                className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-600 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
+                                            />
                                         </div>
-                                    </ModalBody>
-                                    <ModalFooter>
-                                        <Button color="danger" variant="light" onPress={onClose}>
-                                            Cancelar
-                                        </Button>
-                                        <Button color="primary" onPress={modificarContraseña}>
-                                            Modificar Contraseña
-                                        </Button>
-                                    </ModalFooter>
-                                </>
-                            )}
-                        </ModalContent>
+                                    </div>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="danger" variant="light" onPress={onClose}>
+                                        Cancelar
+                                    </Button>
+                                    <Button color="primary" onPress={modificarContraseña}>
+                                        Modificar Contraseña
+                                    </Button>
+                                </ModalFooter>
+                            </>
+                        )}
+                    </ModalContent>
 
-                    </Modal>
+                </Modal>
 
                 <Modal isOpen={isOpenEliminar} onOpenChange={onOpenChangeEliminar} size='3xl' scrollBehavior='inside'>
                     <ModalContent>

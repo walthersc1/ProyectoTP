@@ -105,8 +105,9 @@ export default function InfoPersonal() {
     }
 
     const actualizarDatos = async (event) => {
-        if (handleSubmit()) {
-                event.preventDefault()
+        event.preventDefault()
+        if (await handleSubmit()) {
+            console.log("Cuardando")
             await axios.post(`/api/queries/`, values);
             toast.success("Se guardaron los cambios")
         }
@@ -119,14 +120,20 @@ export default function InfoPersonal() {
 
 
     const handleSubmit = async (e) => {
+        const validacionNum = /\d/
         const validationErrors = {};
-        console.log(values)
         // personalisar mas los mensaje de error para nombre y apellido, la segunda condicion del if
         if (!values.nombre.trim() || !values.nombre.includes(" ")) {
             validationErrors.nombre = "Introdusca sus nombres"
         }
+        if (validacionNum.test(values.nombre)) {
+            validationErrors.nombre = "El nombre no puede contener números"  
+        }
         if (!values.apellido.trim() || !values.apellido.includes(" ")) {
             validationErrors.apellido = "Introdusca sus apellidos"
+        }
+        if (regex.test(values.apellido)) {
+            validationErrors.apellido = "El apellido no puede contener números"  
         }
 
         if (!values.edad.trim()) {
@@ -169,14 +176,17 @@ export default function InfoPersonal() {
         }
 
         setErrors(validationErrors)
-
-        if (Object.keys(validationErrors).length == 0) {
+        console.log(Object.keys(validationErrors).length)
+        const nErores = Object.keys(validationErrors).length
+        if ( nErores == 0) {
+            console.log("true")
             return true
         } else {
             return false
         }
 
     }
+
     const modificarContraseña = async () => {
         if(!values.ConstActual.trim()){
             toast.error("Por favor su contraseña actual")
@@ -184,7 +194,12 @@ export default function InfoPersonal() {
         }
         if (!values.ConstNueva.trim()) {
             toast.error("Por favor ingresar una contraseña nueva")
-        } else {
+            return
+        }if((String)(values.ConstNueva).length < 6 && (String)(values.ConstConfirm).length < 6){
+            toast.error("La contraseña tiene que tener una longitud minima de 6")
+            return
+        }
+         else {
             try {
                 if (values.ConstNueva == values.ConstConfirm) {
                     const respuesta = await axios.put('/api/queries/contrasena/', values);
