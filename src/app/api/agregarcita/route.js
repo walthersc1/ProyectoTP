@@ -1,7 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 
-
 export async function PUT(request) {
     try {
         const datos = await request.json();
@@ -24,7 +23,7 @@ export async function PUT(request) {
         })
 
         if (hayconflicto) {
-            return NextResponse.json({ error:"hay un cruse con el horario ingresado" }, { status: 405 })
+            return NextResponse.json({ error:"Hay un cruce con el horario ingresado" }, { status: 405 })
         }
         await sql`
          INSERT INTO cita (fecha, iddocente, idestudiante, modalidad, lugar, horainicio, horafin)

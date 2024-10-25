@@ -124,7 +124,7 @@ export default function InfoPersonal() {
         const validationErrors = {};
         // personalisar mas los mensaje de error para nombre y apellido, la segunda condicion del if
         if (!values.nombre.trim() || !values.nombre.includes(" ")) {
-            validationErrors.nombre = "Introdusca sus nombres"
+            validationErrors.nombre = "Introduzca sus nombres"
         }
         if (validacionNum.test(values.nombre)) {
             validationErrors.nombre = "El nombre no puede contener números"  

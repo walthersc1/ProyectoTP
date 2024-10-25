@@ -18,7 +18,7 @@ export default function DroplistPaciente () {
             const datoPaciente = await axios.get(`/api/queries/${correo}`);
             const codEstudiante = datoPaciente.data.codestudiante;
             const estudiante = datoPaciente.data.apellido.split(" ")[0] + " " + datoPaciente.data.nombre.split(" ")[0]
-            console.log("Estudiante: " + codEstudiante + " codEstudiante: " + codEstudiante)
+            //console.log("Estudiante: " + codEstudiante + " codEstudiante: " + codEstudiante)
             setdatosEstudiante({
                 codEstudiante: codEstudiante,
                 nomEstudiante: estudiante

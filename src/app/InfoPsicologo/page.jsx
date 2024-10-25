@@ -141,7 +141,7 @@ export default function InfoPsicologo() {
         const validacionNum = /\d/
 
         if (!values.nombre.trim()) {
-            validationErrors.nombre = "Introdusca su apellido"
+            validationErrors.nombre = "Introduzca su apellido"
         }
         if (validacionNum.test(values.nombre)) {
             validationErrors.nombre = "El nombre no puede contener números"

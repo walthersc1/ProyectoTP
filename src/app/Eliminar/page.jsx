@@ -1,7 +1,16 @@
+"use client";
 import React from 'react'
-import Image from "next/image";
+import axios from 'axios'
+
 
 export default function Eliminar () {
+  const enviarEmail = async(e) =>{
+    
+    console.log("Entrando al api")
+    const resultado =await axios.get('/api/correo',datos);
+    return
+  }
+
   return (
     <section className="flex justify-center justify-items-center text-center">
             <div className="flex-col bg-slate-800 border border-slate-400 rounded-md m-16 p-14 shadow-lg
@@ -15,8 +24,8 @@ export default function Eliminar () {
                     </div>
                 </div>                
                 <div className='flex gap-8 px-3'>
-                  <button className='text-[18px] shadow-lg font-bold w-1/2 text-slate-50 my-6 p-2 
-                  rounded-full bg-teal-400'>Eliminar</button>
+                  <button onClick={enviarEmail} className='text-[18px] shadow-lg font-bold w-1/2 text-slate-50 my-6 p-2 
+                  rounded-full bg-teal-400' >Eliminar</button>
                   <button className='text-[18px] shadow-lg font-bold w-1/2 text-black my-6 p-2 
                   rounded-full bg-white'>Cancelar</button>
 
