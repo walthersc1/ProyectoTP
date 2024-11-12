@@ -15,7 +15,7 @@ export default function TextProcessor() {
   const [data, setdata] = useState({
     gradodepresion: "",
     idestudiante: "",
-    user:"",
+    user: "",
     respuesta1: "",
     respuesta2: "",
     respuesta3: "",
@@ -25,6 +25,12 @@ export default function TextProcessor() {
     respuesta7: "",
     respuesta8: "",
     respuesta9: "",
+  });
+  const [inputAlgoritmo, setinputAlgoritmo] = useState({
+    all_responses: "",
+    gender: "",
+    age: 0,
+    major: "",
   });
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
@@ -57,27 +63,28 @@ export default function TextProcessor() {
     setBotResponseIndex((prevIndex) => prevIndex + 1);
   };
 
+  const limpiarTexto = (texto) => {
+    return texto.replace(/[^a-zA-Z\s]/g, '');
+  };
+
 
   const actualizarDatos = async (e) => {
     e.preventDefault();
     //console.log("Se envio la respuesta")
-    if (input.length < 20) {
+    const msgLimpio = limpiarTexto(input)
+    if (msgLimpio.length < 2 && botResponseIndex > 1) {
       toast.error("El mensaje es muy corto, por favor detalles mas su respuesta.");
-      return; 
+      return;
     }
-  
-    const userMessage = { text: input, sender: data.user };
+
+    const userMessage = { text: msgLimpio, sender: data.user };
 
     setMessages([...messages, userMessage]);
     setInput('');
-  
-    const response = await axios.get('https://tpalgoritmo-production.up.railway.app/predict/', {
-      params: {
-        text: userMessage.text
-      }
-    });
 
-    let rawData = response.data;
+
+
+    let rawData = "";//response.data;
 
     if (typeof rawData !== 'string') {
       rawData = JSON.stringify(rawData);
@@ -92,33 +99,35 @@ export default function TextProcessor() {
         ...data,
         [nombreAtributo]: userMessage.text,
       });
+      setinputAlgoritmo({
+        ...inputAlgoritmo,
+        all_responses: inputAlgoritmo.all_responses + " " + msgLimpio,
+      })
       setTotalResult(prevTotal => prevTotal + number);
       contado += 1;
     }
     if (botResponseIndex === 10) {
-      let grado = "";
+      let constGrado
+      console.log(inputAlgoritmo)
       setIsDisabled(true);
-      console.log("Entrando a generar resultado resultado: " + totalResult)
-      switch (true) {
-        case totalResult < 5:
-          grado = "Minima"
-          break;
-        case totalResult < 10:
-          grado = 'Leve'
-          break;
-        case totalResult < 15:
-          grado = 'Moderada'
-          break;
-        case totalResult < 20:
-          grado = 'Moderadamente severa'
-          break;
-        default:
-          grado = 'Severa'
-          break;
+      const response = await axios.post('https://tpalgoritmo-production.up.railway.app/predict/', inputAlgoritmo);
+      console.log(response)
+      const puntaje = response.data[0]
+      if(puntaje[1] == 0 ){
+        constGrado = 'Ninguna'
+      }if(puntaje[1] == 1 ){
+        constGrado = 'Leve'
+      }if(puntaje[1] == 2 ){
+        constGrado = 'Moderado'
+      }if(puntaje[1] == 3 ){
+        constGrado = 'Moderadamente Severo '
+      }if(puntaje[1] == 4 ){
+        constGrado = 'Severo'
       }
+      console.log(constGrado);
       setdata({
         ...data,
-        gradodepresion: grado,
+        gradodepresion: constGrado,
         respuesta9: userMessage.text,
       })
     }
@@ -137,7 +146,7 @@ export default function TextProcessor() {
         toast.error('Se genero un error al momento de guardar sus respuestas')
       }
     };
-    if (data.gradodepresion !== "" ) {
+    if (data.gradodepresion !== "") {
       console.log("Entrando a guardar resultado ****")
       mostrarREsultado();
     }
@@ -166,8 +175,14 @@ export default function TextProcessor() {
         setdata((prevData) => ({
           ...prevData,
           idestudiante: (usuario.data.idestudiante),
-          user:(usuario.data.nombre)
+          user: (usuario.data.nombre)
         }));
+        setinputAlgoritmo((prevData) => ({
+          ...prevData,
+          age: usuario.data.edad,
+          gender: usuario.data.genero,
+          major: usuario.data.carrera
+        }))
       } catch (error) {
         console.error('Error al obtener la información del usuario:', error);
       }

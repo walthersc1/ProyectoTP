@@ -32,15 +32,32 @@ export default function InfoPersonal() {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
     const año = new Date().getFullYear();
 
+    const consultaUsuario = async (e) => {
+        const data = await axios.get('/api/getToken')
+        const correo = data.data.email
+        //console.log(correo)
+        const usuario = await axios.get(`/api/queries/${correo}`,{
+            headers: {
+            'Cache-Control': 'no-cache'
+        }})
+        console.log(usuario.data)
+        return usuario;
+    };
+
+
+    const fetchCarreras = async () => {
+        try {
+            const RsCarreras = await axios.get('/api/queries/carreras');
+            setCarreras(RsCarreras.data.datos.rows);
+        } catch (error) {
+            console.error('Error al obtener las carreras:', error);
+        }
+    };
+
     useEffect(() => {
 
-        const consultaUsuario = async (e) => {
-            const data = await axios.get('/api/getToken')
-            const correo = data.data.email
-            //console.log(correo)
-            const usuario = await axios.get(`/api/queries/${correo}`)
-            //console.log(usuario.data)
-
+        consultaUsuario().then((usuario) => {
+            console.log(usuario)
             setValoresInput({
                 idestudiante: usuario.data.idestudiante,
                 nombre: usuario.data.nombre,
@@ -57,19 +74,7 @@ export default function InfoPersonal() {
                 ConstNueva: "",
                 ConstConfirm: "",
             });
-
-        };
-
-        const fetchCarreras = async () => {
-            try {
-                const RsCarreras = await axios.get('/api/queries/carreras');
-                setCarreras(RsCarreras.data.datos.rows);
-            } catch (error) {
-                console.error('Error al obtener las carreras:', error);
-            }
-        };
-        
-        consultaUsuario();
+        });
         fetchCarreras();
 
     }, []);
@@ -127,13 +132,13 @@ export default function InfoPersonal() {
             validationErrors.nombre = "Introduzca sus nombres"
         }
         if (validacionNum.test(values.nombre)) {
-            validationErrors.nombre = "El nombre no puede contener números"  
+            validationErrors.nombre = "El nombre no puede contener números"
         }
         if (!values.apellido.trim() || !values.apellido.includes(" ")) {
             validationErrors.apellido = "Introdusca sus apellidos"
         }
         if (regex.test(values.apellido)) {
-            validationErrors.apellido = "El apellido no puede contener números"  
+            validationErrors.apellido = "El apellido no puede contener números"
         }
 
         if (!values.edad.trim()) {
@@ -178,7 +183,7 @@ export default function InfoPersonal() {
         setErrors(validationErrors)
         console.log(Object.keys(validationErrors).length)
         const nErores = Object.keys(validationErrors).length
-        if ( nErores == 0) {
+        if (nErores == 0) {
             console.log("true")
             return true
         } else {
@@ -188,18 +193,18 @@ export default function InfoPersonal() {
     }
 
     const modificarContraseña = async () => {
-        if(!values.ConstActual.trim()){
+        if (!values.ConstActual.trim()) {
             toast.error("Por favor su contraseña actual")
             return
         }
         if (!values.ConstNueva.trim()) {
             toast.error("Por favor ingresar una contraseña nueva")
             return
-        }if((String)(values.ConstNueva).length < 6 && (String)(values.ConstConfirm).length < 6){
+        } if ((String)(values.ConstNueva).length < 6 && (String)(values.ConstConfirm).length < 6) {
             toast.error("La contraseña tiene que tener una longitud minima de 6")
             return
         }
-         else {
+        else {
             try {
                 if (values.ConstNueva == values.ConstConfirm) {
                     const respuesta = await axios.put('/api/queries/contrasena/', values);
@@ -288,7 +293,7 @@ export default function InfoPersonal() {
                                 <input
                                     type="number"
                                     name="edad"
-                                    id="Age"
+                                    id="edad"
                                     autoComplete="address-level1"
                                     className="font-sans block bg-gray-300 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-500 placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 p-3"
                                     onChange={handleChange}

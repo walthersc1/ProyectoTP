@@ -48,7 +48,7 @@ export async function PUT(request) {
 export async function POST(req, { params }) {
   try {
     const datos = await req.json();
-    console.log("Entrando al post")
+    console.log("Entrando al post******")
     console.log(datos);
     await sql`UPDATE estudiantes
     SET 
@@ -61,7 +61,8 @@ export async function POST(req, { params }) {
         fechanacimiento = ${datos.fechanacimiento},
         estado = ${datos.estado}
     WHERE
-      idestudiante = ${datos.idestudiante};`
+      idestudiante = ${datos.idestudiante}`
+      sql.
 console.log("Sale de la query")
     return NextResponse.json("Se actualizo correctamnete - 200");
   } catch (error) {

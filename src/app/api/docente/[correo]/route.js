@@ -37,7 +37,8 @@ export async function POST(req, { params }) {
         horafin = ${datos.horafin},
         estado = ${datos.estado}
     WHERE
-        iddocente = ${datos.iddocente};`
+        iddocente = ${datos.iddocente}
+        commit `
 
     return NextResponse.json("Se actualizo correctamnete - 200");
   } catch (error) {
